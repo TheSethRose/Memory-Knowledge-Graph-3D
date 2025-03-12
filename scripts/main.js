@@ -166,20 +166,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    document.getElementById('toggle-controls').addEventListener('click', () => {
-        if (Graph) {
-            // Toggle orbit controls
-            const controlsEnabled = Graph.controlsEnabled();
-            Graph.enableNavigationControls(!controlsEnabled);
+    document.getElementById('refresh-data').addEventListener('click', async () => {
+        // Get the current active tab
+        const isJsonTab = document.getElementById('json-tab').classList.contains('active');
 
-            // Visual feedback for the button
-            const button = document.getElementById('toggle-controls');
-            if (!controlsEnabled) {
-                button.style.backgroundColor = '';
-                button.style.color = '';
-            } else {
-                button.style.backgroundColor = '#555';
-                button.style.color = '#999';
+        if (isJsonTab) {
+            // If JSON tab is active, reparse the JSON input
+            const jsonData = document.getElementById('data-input').value;
+            if (jsonData) {
+                try {
+                    const data = JSON.parse(jsonData);
+                    await initGraphWithData(data);
+                } catch (error) {
+                    console.log("Not standard JSON, trying JSONL format...");
+                    try {
+                        const data = processJsonlText(jsonData);
+                        await initGraphWithData(data);
+                    } catch (error) {
+                        console.error("Error parsing data:", error);
+                        alert("Error parsing data: " + error.message);
+                    }
+                }
+            }
+        } else {
+            // If file tab is active, trigger file input change if a file is selected
+            const fileInput = document.getElementById('file-input');
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        await initGraphWithData(data);
+                    } catch (jsonError) {
+                        console.log("Not standard JSON, trying JSONL format...");
+                        try {
+                            const data = processJsonlText(e.target.result);
+                            await initGraphWithData(data);
+                        } catch (error) {
+                            console.error("Error parsing file:", error);
+                            alert("Error parsing file: " + error.message);
+                        }
+                    }
+                };
+                reader.readAsText(file);
             }
         }
     });
