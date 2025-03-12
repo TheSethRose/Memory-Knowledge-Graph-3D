@@ -10,6 +10,10 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 
     <!-- Load Three.js first -->
+    <script>
+        // Set a flag to indicate that Three.js is loaded via script tag
+        window.__THREE_ALREADY_LOADED__ = true;
+    </script>
     <script src="https://unpkg.com/three@0.137.0/build/three.min.js"></script>
 
     <!-- Load d3 -->
@@ -17,6 +21,9 @@
 
     <!-- Load SpriteText -->
     <script src="https://unpkg.com/three-spritetext@1.6.5/dist/three-spritetext.min.js"></script>
+
+    <!-- Load Stats.js for performance monitoring -->
+    <script src="https://unpkg.com/stats.js@0.17.0/build/stats.min.js"></script>
 
     <!-- Load 3d-force-graph -->
     <script src="https://unpkg.com/3d-force-graph@1.71.5/dist/3d-force-graph.min.js"></script>
@@ -152,7 +159,9 @@
                 <span id="refresh-countdown">30</span>s</span>
         </div>
 
-        <div id="graph"></div>
+        <div id="graph-container">
+            <div id="graph"></div>
+        </div>
         <div id="tooltip" class="tooltip"></div>
 
         <!-- Stats panel for performance monitoring -->
@@ -162,6 +171,5 @@
             <div>FPS: <span id="fps">0</span></div>
         </div>
     </div>
-    <script type="module" src="/scripts/main.js"></script>
 </body>
 </html>

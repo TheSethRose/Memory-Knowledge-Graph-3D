@@ -140,6 +140,9 @@ export function initGraphWithData(data) {
             };
         }
 
+        // Randomize initial node positions in 3D space
+        randomizeNodePositions(data.nodes);
+
         // Store the graph data
         setGraphData(data);
 
@@ -188,22 +191,67 @@ export function initGraphWithData(data) {
             .nodeLabel(node => `${node.name} (${node.type})`)
             .nodeThreeObjectExtend(true)
             .nodeThreeObject(node => {
-                // Check if SpriteText is available globally
-                if (!window.SpriteText) {
-                    console.error('SpriteText is not defined in window object');
+                // Check if THREE and SpriteText are available globally
+                if (!window.THREE || !window.SpriteText) {
+                    console.error('THREE or SpriteText is not defined in window object');
                     return null;
                 }
+
+                // Create a group to hold both the sphere and the text
+                const group = new window.THREE.Group();
+
+                // Determine if this node is highlighted
+                const isHighlighted = highlightNodes.has(node);
+
+                // Create a sphere for the node
+                const radius = Math.sqrt(node.val || 10) * (isHighlighted ? 1.2 : 0.8);
+                const geometry = new window.THREE.SphereGeometry(radius, 16, 16);
+
+                // Use different material for highlighted nodes
+                let material;
+                if (isHighlighted) {
+                    // Highlighted nodes get a glowing effect
+                    material = new window.THREE.MeshPhongMaterial({
+                        color: node.color || '#9C27B0',
+                        emissive: node.color || '#9C27B0',
+                        emissiveIntensity: 0.5,
+                        transparent: true,
+                        opacity: 0.9,
+                        shininess: 100
+                    });
+
+                    // Add a halo effect for highlighted nodes
+                    const haloGeometry = new window.THREE.SphereGeometry(radius * 1.3, 16, 16);
+                    const haloMaterial = new window.THREE.MeshBasicMaterial({
+                        color: 0xffffff,
+                        transparent: true,
+                        opacity: 0.2,
+                        side: window.THREE.BackSide
+                    });
+                    const halo = new window.THREE.Mesh(haloGeometry, haloMaterial);
+                    group.add(halo);
+                } else {
+                    // Regular nodes
+                    material = new window.THREE.MeshLambertMaterial({
+                        color: node.color || '#9C27B0',
+                        transparent: true,
+                        opacity: 0.75
+                    });
+                }
+
+                const sphere = new window.THREE.Mesh(geometry, material);
+                group.add(sphere);
 
                 // Create a text sprite for the label
                 const sprite = new window.SpriteText(node.name);
                 sprite.color = '#FFFFFF';
-                sprite.textHeight = 8;
-                sprite.position.y = -12;
-                sprite.backgroundColor = highlightNodes.has(node) ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)';
+                sprite.textHeight = isHighlighted ? 10 : 8;
+                sprite.position.y = -radius - 10; // Position below the sphere
+                sprite.backgroundColor = isHighlighted ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.5)';
                 sprite.padding = 4;
                 sprite.borderRadius = 3;
-                sprite.fontWeight = highlightNodes.has(node) ? 'bold' : 'normal';
-                sprite.strokeWidth = highlightNodes.has(node) ? 0.5 : 0;
+                sprite.fontWeight = isHighlighted ? 'bold' : 'normal';
+                sprite.strokeWidth = isHighlighted ? 0.5 : 0;
                 sprite.strokeColor = node.color;
 
                 if (sprite.material) {
@@ -211,20 +259,54 @@ export function initGraphWithData(data) {
                     sprite.material.depthWrite = false;
                 }
 
-                return sprite;
+                group.add(sprite);
+
+                return group;
             })
             .linkLabel(link => link.description || link.type)
-            .linkWidth(link => highlightLinks.has(link) ? 3 : 1)
-            .linkDirectionalParticles(link => highlightLinks.has(link) ? 4 : 0)
-            .linkDirectionalParticleWidth(3)
+            .linkWidth(link => highlightLinks.has(link) ? 5 : 1.5)
+            .linkOpacity(link => highlightLinks.has(link) ? 1 : 0.5)
+            .linkDirectionalParticles(link => highlightLinks.has(link) ? 6 : 0)
+            .linkDirectionalParticleWidth(4)
             .linkDirectionalParticleSpeed(0.01)
-            .linkDirectionalArrowLength(5)
+            .linkDirectionalArrowLength(link => highlightLinks.has(link) ? 8 : 0)
             .linkDirectionalArrowRelPos(1)
-            .linkCurvature(0.25)
-            .d3Force('charge', window.d3.forceManyBody().strength(-180))
-            .d3Force('link', window.d3.forceLink().distance(link => 120).id(d => d.id))
-            .d3Force('center', window.d3.forceCenter().strength(0.05))
-            .d3Force('collision', window.d3.forceCollide(node => Math.sqrt(node.val || 10) * 2.5));
+            .linkColor(link => {
+                return highlightLinks.has(link) ? '#FFFFFF' : link.color || '#CCCCCC';
+            })
+            // Stronger repulsion force for better 3D distribution
+            .d3Force('charge', window.d3.forceManyBody().strength(-250))
+            // Shorter link distance to create a more compact cloud
+            .d3Force('link', window.d3.forceLink().distance(link => 80).id(d => d.id))
+            // Weaker center force to allow more natural clustering
+            .d3Force('center', window.d3.forceCenter().strength(0.03))
+            // Stronger collision force to prevent overlap
+            .d3Force('collision', window.d3.forceCollide(node => Math.sqrt(node.val || 10) * 3))
+            // Add a z-force to push nodes in 3D space
+            .d3Force('z', () => {
+                // This custom force pushes nodes in the z direction based on their type
+                return function(alpha) {
+                    const nodes = graph.graphData().nodes;
+                    const types = new Set(nodes.map(node => node.type));
+                    const typeArray = Array.from(types);
+
+                    nodes.forEach(node => {
+                        // Get z-force based on node type (different types at different depths)
+                        const typeIndex = typeArray.indexOf(node.type);
+                        const targetZ = (typeIndex / typeArray.length - 0.5) * 200;
+
+                        // Apply force toward target Z with some randomness
+                        const dz = targetZ - (node.z || 0);
+                        node.vz = node.vz || 0;
+                        node.vz += dz * alpha * 0.1;
+
+                        // Add some random movement in all directions for a more natural cloud
+                        node.vx += (Math.random() - 0.5) * alpha * 10;
+                        node.vy += (Math.random() - 0.5) * alpha * 10;
+                        node.vz += (Math.random() - 0.5) * alpha * 10;
+                    });
+                };
+            });
 
         // Define the onNodeClick handler separately to ensure it's properly bound
         const handleNodeClick = function(node) {
@@ -301,13 +383,220 @@ export function initGraphWithData(data) {
         console.log('Storing graph instance');
         setGraph(graph);
 
+        // Add lighting to the scene
+        addLighting(graph.scene());
+
         // Configure enhanced controls
         configureEnhancedControls(graph);
 
         // Initial camera positioning
         setTimeout(() => {
+            // First zoom to fit to get all nodes in view
             graph.zoomToFit(400);
+
+            // Then after a short delay, adjust the camera angle to show the 3D nature
+            setTimeout(() => {
+                const currentPos = graph.camera().position;
+                const distance = Math.sqrt(currentPos.x * currentPos.x + currentPos.y * currentPos.y + currentPos.z * currentPos.z);
+
+                // Move camera to an angled position to show 3D depth
+                graph.cameraPosition(
+                    {
+                        x: distance * 0.8,
+                        y: distance * 0.6,
+                        z: distance * 0.8
+                    },
+                    // Look at the center
+                    { x: 0, y: 0, z: 0 },
+                    // Transition duration
+                    1000
+                );
+            }, 500);
         }, 200);
+
+        // Add subtle animation to nodes
+        let animationFrame;
+        const animateNodes = () => {
+            if (!graph) return;
+
+            const time = Date.now() * 0.001; // Convert to seconds
+
+            // Get all node objects
+            const nodeObjects = graph.scene().children.filter(obj =>
+                obj.type === 'Group' &&
+                obj.children.some(child => child.type === 'Mesh')
+            );
+
+            // Apply subtle floating animation to each node
+            nodeObjects.forEach(group => {
+                const meshes = group.children.filter(child => child.type === 'Mesh');
+                if (meshes.length > 0) {
+                    // Get the node data to determine animation properties
+                    const nodeData = group.__data;
+                    if (!nodeData) return;
+
+                    // Store original position if not already stored
+                    if (!group.userData.originalY) {
+                        group.userData.originalY = group.position.y;
+                    }
+
+                    // Reset to original position first
+                    group.position.y = group.userData.originalY;
+
+                    // Different animation based on node type
+                    const amplitude = 0.05;
+                    const frequency = 0.5 + (nodeData.id.charCodeAt(0) % 10) * 0.05;
+
+                    // Apply subtle floating motion
+                    group.position.y += Math.sin(time * frequency) * amplitude;
+
+                    // For highlighted nodes, add a subtle pulse
+                    if (nodeData && highlightNodes.has(nodeData)) {
+                        meshes.forEach(mesh => {
+                            if (mesh.material && mesh.material.emissiveIntensity) {
+                                mesh.material.emissiveIntensity = 0.3 + Math.sin(time * 2) * 0.2;
+                            }
+                        });
+                    }
+                }
+            });
+
+            animationFrame = requestAnimationFrame(animateNodes);
+        };
+
+        // Start animation
+        animateNodes();
+
+        // Store cleanup function
+        const cleanup = () => {
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+        };
+
+        // Add cleanup to the graph's dispose method
+        const originalDispose = graph.dispose;
+        graph.dispose = () => {
+            cleanup();
+            originalDispose.call(graph);
+        };
+
+        // Add hover effect
+        graph.onNodeHover(node => {
+            // Get the previous hovered node if any
+            const prevNode = graph.__prevHoveredNode;
+
+            // Handle node out effect first (when node is null or different from previous)
+            if (prevNode && (!node || node !== prevNode)) {
+                // Reset node appearance if it's not highlighted
+                if (!highlightNodes.has(prevNode)) {
+                    const nodeObjects = graph.scene().children.filter(obj =>
+                        obj.type === 'Group' &&
+                        obj.children.some(child => child.type === 'Mesh') &&
+                        obj.__data === prevNode
+                    );
+
+                    if (nodeObjects.length > 0) {
+                        const nodeGroup = nodeObjects[0];
+
+                        // Reset meshes
+                        const meshes = nodeGroup.children.filter(child => child.type === 'Mesh');
+                        meshes.forEach(mesh => {
+                            if (mesh.userData.originalScale) {
+                                mesh.scale.set(
+                                    mesh.userData.originalScale.x,
+                                    mesh.userData.originalScale.y,
+                                    mesh.userData.originalScale.z
+                                );
+                            }
+                        });
+
+                        // Reset sprites
+                        const sprites = nodeGroup.children.filter(child => child.type === 'Sprite');
+                        sprites.forEach(sprite => {
+                            if (sprite.userData.originalScale) {
+                                sprite.scale.set(
+                                    sprite.userData.originalScale.x,
+                                    sprite.userData.originalScale.y,
+                                    sprite.userData.originalScale.z
+                                );
+                            }
+                        });
+                    }
+                }
+            }
+
+            // Store current node as previous for next call
+            graph.__prevHoveredNode = node;
+
+            // Handle cursor
+            if (!node) {
+                // Reset cursor when not hovering over a node
+                const graphContainer = document.getElementById('graph-container') || document.getElementById('graph');
+                if (graphContainer) {
+                    graphContainer.style.cursor = 'default';
+                }
+                return;
+            }
+
+            // Change cursor to pointer when hovering over a node
+            const graphContainer = document.getElementById('graph-container') || document.getElementById('graph');
+            if (graphContainer) {
+                graphContainer.style.cursor = 'pointer';
+            }
+
+            // Get the node object
+            const nodeObjects = graph.scene().children.filter(obj =>
+                obj.type === 'Group' &&
+                obj.children.some(child => child.type === 'Mesh') &&
+                obj.__data === node
+            );
+
+            if (nodeObjects.length > 0) {
+                const nodeGroup = nodeObjects[0];
+                const meshes = nodeGroup.children.filter(child => child.type === 'Mesh');
+
+                // Apply hover effect to meshes
+                meshes.forEach(mesh => {
+                    if (!mesh.userData.originalScale) {
+                        mesh.userData.originalScale = {
+                            x: mesh.scale.x,
+                            y: mesh.scale.y,
+                            z: mesh.scale.z
+                        };
+                    }
+
+                    // Slightly increase the scale for hover effect
+                    if (!highlightNodes.has(node)) {
+                        mesh.scale.set(
+                            mesh.userData.originalScale.x * 1.1,
+                            mesh.userData.originalScale.y * 1.1,
+                            mesh.userData.originalScale.z * 1.1
+                        );
+                    }
+                });
+
+                // Apply hover effect to text
+                const sprites = nodeGroup.children.filter(child => child.type === 'Sprite');
+                sprites.forEach(sprite => {
+                    if (!sprite.userData.originalScale) {
+                        sprite.userData.originalScale = {
+                            x: sprite.scale.x,
+                            y: sprite.scale.y
+                        };
+                    }
+
+                    // Slightly increase the scale for hover effect
+                    if (!highlightNodes.has(node)) {
+                        sprite.scale.set(
+                            sprite.userData.originalScale.x * 1.1,
+                            sprite.userData.originalScale.y * 1.1,
+                            sprite.userData.originalScale.z * 1.1
+                        );
+                    }
+                });
+            }
+        });
 
         return graph;
     } catch (error) {
@@ -474,4 +763,53 @@ function configureEnhancedControls(graph) {
 
     // Update controls to apply changes
     controls.update();
+}
+
+// Function to randomize node positions in 3D space
+function randomizeNodePositions(nodes) {
+    if (!nodes || !nodes.length) return;
+
+    // Calculate a reasonable radius based on the number of nodes
+    const radius = Math.cbrt(nodes.length) * 100;
+
+    nodes.forEach(node => {
+        // Random spherical coordinates
+        const theta = Math.random() * Math.PI * 2; // Azimuthal angle (around y-axis)
+        const phi = Math.acos((Math.random() * 2) - 1); // Polar angle (from y-axis)
+        const r = radius * Math.cbrt(Math.random()); // Radius with cubic distribution for more even spacing
+
+        // Convert to Cartesian coordinates
+        node.x = r * Math.sin(phi) * Math.cos(theta);
+        node.y = r * Math.cos(phi);
+        node.z = r * Math.sin(phi) * Math.sin(theta);
+
+        // Add small random velocities
+        node.vx = (Math.random() - 0.5) * 5;
+        node.vy = (Math.random() - 0.5) * 5;
+        node.vz = (Math.random() - 0.5) * 5;
+    });
+}
+
+// Function to add lighting to the scene
+function addLighting(scene) {
+    if (!window.THREE) {
+        console.error('THREE is not defined in window object');
+        return;
+    }
+
+    // Add ambient light
+    const ambientLight = new window.THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    // Add directional light
+    const directionalLight = new window.THREE.DirectionalLight(0xffffff, 0.6);
+    directionalLight.position.set(1000, 1000, 1000);
+    scene.add(directionalLight);
+
+    // Add a second directional light from another angle
+    const directionalLight2 = new window.THREE.DirectionalLight(0xffffff, 0.4);
+    directionalLight2.position.set(-1000, -1000, -1000);
+    scene.add(directionalLight2);
+
+    console.log('Added lighting to scene');
 }
