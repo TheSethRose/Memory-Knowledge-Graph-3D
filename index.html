@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="system">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seth Rose Memory Knowledge Graph 3D</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <script type="module" src="/scripts/main.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Progress bar for loading large datasets -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <div>Loading 3D memory graph...</div>
+            <div id="loading-status">Preparing data...</div>
+        </div>
+
+        <!-- Theme toggle button -->
+        <div class="theme-toggle" id="theme-toggle">
+            <span class="theme-toggle-icon">🌓</span>
+            <span class="theme-toggle-text">Toggle Theme</span>
+        </div>
+
+        <div class="panel">
+            <h1>Memory Knowledge Graph 3D</h1>
+
+            <div id="data-path-form">
+                <div class="tab-buttons">
+                    <div class="tab-button active" id="file-tab">Load From File</div>
+                    <div class="tab-button" id="json-tab">Paste JSON</div>
+                </div>
+
+                <div id="file-tab-content" style="display: block;">
+                    <input type="file" id="file-input" accept=".json,.jsonl">
+                </div>
+
+                <div id="json-tab-content">
+                    <textarea id="data-input" placeholder="Paste your JSON data here..."></textarea>
+                    <button id="parse-json">Load Data</button>
+                </div>
+            </div>
+
+            <input type="text" id="search" placeholder="Search entities..." />
+
+            <select id="category-filter">
+                <option value="All">All Categories</option>
+                <!-- Categories will be populated by JavaScript -->
+            </select>
+
+            <div class="toggle-button">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="node-labels" checked>
+                    <span class="slider"></span>
+                </label>
+                <label for="node-labels">Show Node Labels</label>
+            </div>
+
+            <div class="toggle-button">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="observations-toggle" checked>
+                    <span class="slider"></span>
+                </label>
+                <label for="observations-toggle">Show Observations</label>
+            </div>
+
+            <div class="toggle-button">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="enable-navigation-controls" checked>
+                    <span class="slider"></span>
+                </label>
+                <label for="enable-navigation-controls">Enable Navigation Controls</label>
+            </div>
+
+            <div class="toggle-button">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="show-performance-stats" checked>
+                    <span class="slider"></span>
+                </label>
+                <label for="show-performance-stats">Show Performance Stats</label>
+            </div>
+
+            <div id="selected-node-info">
+                <h2>Select a node to see details</h2>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="center-graph">Center Graph</button>
+            <button id="reset-filters">Reset Filters</button>
+        </div>
+
+        <div id="graph"></div>
+        <div id="tooltip" class="tooltip"></div>
+
+        <!-- Stats panel for performance monitoring -->
+        <div class="stats-panel" id="stats-panel" style="display: none;">
+            <div>Nodes: <span id="node-count">0</span></div>
+            <div>Links: <span id="link-count">0</span></div>
+            <div>FPS: <span id="fps">0</span></div>
+        </div>
+    </div>
+    <script type="module" src="/scripts/main.js"></script>
+</body>
+</html>
