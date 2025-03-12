@@ -5,6 +5,7 @@ import { initPerformanceMonitoring } from './modules/performance.js';
 import { initGraphWithData } from './modules/graph-renderer.js';
 import { processJsonlText, processMemoryJson } from './modules/data-processor.js';
 import { filterGraph } from './modules/graph-utils.js';
+import { initSearch } from './modules/search.js';
 
 // Global state
 import { showLabels, showObservations, Graph, selectedNode, highlightNodes, highlightLinks, graphData, setSelectedNode } from './modules/state.js';
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initPanelToggle();
     initObservationsPanel();
     initControlsHelp();
+    initSearch();
 
     // Set default values for display options (since we removed the toggles)
     window.showLabels = true;
@@ -287,11 +289,12 @@ function initControlsHelp() {
 
         // Check if there's a saved preference
         const savedHidden = localStorage.getItem('controlsHelpHidden');
-        // By default, show the controls help (only hide if explicitly set to hidden)
-        if (savedHidden === 'true') {
+
+        // Default to hidden unless explicitly set to visible
+        if (savedHidden === 'false') {
+            controlsHelp.classList.remove('hidden');
+        } else {
             controlsHelp.classList.add('hidden');
         }
-
-        // Remove the click outside listener to prevent auto-closing
     }
 }

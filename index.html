@@ -90,8 +90,23 @@
             <span>👁️</span>
         </div>
 
+        <!-- Search panel in top right -->
+        <div id="search-panel" class="search-panel collapsed">
+            <div class="search-header">
+                <h3>Find Nodes</h3>
+                <div class="search-close" title="Close Search">×</div>
+            </div>
+            <div class="search-input-container">
+                <input type="text" id="node-search" placeholder="Type to search..." autocomplete="off">
+            </div>
+            <div id="search-results" class="search-results"></div>
+        </div>
+        <button id="search-toggle" class="search-toggle" title="Search Nodes">
+            <span>🔍</span>
+        </button>
+
         <!-- Controls help panel -->
-        <div class="controls-help" id="controls-help">
+        <div class="controls-help hidden" id="controls-help">
             <h3>Navigation Controls</h3>
             <div class="control-close">×</div>
             <div class="control-row">

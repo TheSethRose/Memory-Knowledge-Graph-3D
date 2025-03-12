@@ -1,168 +1,125 @@
 {
   "nodes": [
-    {
-      "id": "user1",
-      "name": "John Doe",
-      "type": "Person",
-      "val": 15,
-      "color": "#4285F4",
-      "observations": [
-        "Software developer with 5 years experience",
-        "Interested in data visualization and analytics",
-        "Works on open-source projects in spare time"
-      ]
-    },
-    {
-      "id": "project1",
-      "name": "Knowledge Visualizer",
-      "type": "Tool",
-      "val": 10,
-      "color": "#34A853",
-      "observations": [
-        "3D visualization tool for knowledge graphs",
-        "Built with modern web technologies",
-        "Helps visualize connections between entities"
-      ]
-    },
-    {
-      "id": "tech1",
-      "name": "Artificial Intelligence",
-      "type": "Technology",
-      "val": 12,
-      "color": "#00BCD4",
-      "observations": [
-        "Field of computer science focused on creating systems that can perform tasks requiring human intelligence",
-        "Includes machine learning, natural language processing, and computer vision"
-      ]
-    },
-    {
-      "id": "tool1",
-      "name": "AI Assistant",
-      "type": "Tool",
-      "val": 8,
-      "color": "#34A853",
-      "observations": [
-        "AI-powered assistant for productivity",
-        "Helps with various tasks including coding and information management"
-      ]
-    },
-    {
-      "id": "lib1",
-      "name": "3D Graphics Library",
-      "type": "Technology",
-      "val": 7,
-      "color": "#00BCD4",
-      "observations": [
-        "JavaScript library for creating 3D graphics in the browser",
-        "Used for building interactive visualizations"
-      ]
-    },
-    {
-      "id": "lib2",
-      "name": "Data Visualization Library",
-      "type": "Technology",
-      "val": 6,
-      "color": "#00BCD4",
-      "observations": [
-        "JavaScript library for data visualization",
-        "Provides tools for creating interactive data visualizations"
-      ]
-    },
-    {
-      "id": "org1",
-      "name": "Tech Company",
-      "type": "Organization",
-      "val": 9,
-      "color": "#EA4335",
-      "observations": [
-        "Technology company focused on software development",
-        "Employs over 100 people across multiple locations",
-        "Founded in 2010"
-      ]
-    },
-    {
-      "id": "event1",
-      "name": "Annual Tech Conference",
-      "type": "Event",
-      "val": 5,
-      "color": "#FBBC05",
-      "observations": [
-        "Annual gathering of technology professionals",
-        "Features presentations on latest industry developments",
-        "Networking opportunity for professionals"
-      ]
-    }
+    { "id": "user1", "name": "John Doe", "type": "Person", "val": 15, "color": "#4285F4", "observations": [ "Software developer with 5 years experience", "Interested in data visualization and analytics", "Works on open-source projects in spare time", "Born June 15, 1988", "Married with two children", "Has type 2 diabetes", "Plays basketball on weekends" ] },
+    { "id": "spouse1", "name": "Sarah Doe", "type": "Person", "val": 14, "color": "#4285F4", "observations": [ "Marketing director at retail company", "MBA from State University", "Amateur photographer", "Volunteers at local animal shelter", "Born March 23, 1990" ] },
+    { "id": "child1", "name": "Emma Doe", "type": "Person", "val": 8, "color": "#4285F4", "observations": [ "10 years old", "Plays violin", "Interested in science", "Member of school chess club" ] },
+    { "id": "child2", "name": "Lucas Doe", "type": "Person", "val": 7, "color": "#4285F4", "observations": [ "7 years old", "Plays soccer", "Loves dinosaurs", "Taking coding classes for kids" ] },
+    { "id": "parent1", "name": "Robert Doe", "type": "Person", "val": 10, "color": "#4285F4", "observations": [ "John's father", "Retired engineer", "Lives in Florida", "Vietnam War veteran", "Hobby woodworker" ] },
+    { "id": "parent2", "name": "Martha Doe", "type": "Person", "val": 10, "color": "#4285F4", "observations": [ "John's mother", "Retired school teacher", "Book club organizer", "Lives in Florida with Robert" ] },
+    { "id": "sibling1", "name": "James Doe", "type": "Person", "val": 12, "color": "#4285F4", "observations": [ "John's brother", "Architect in Chicago", "Married with one child", "Marathon runner" ] },
+    { "id": "friend1", "name": "Michael Chen", "type": "Person", "val": 9, "color": "#4285F4", "observations": [ "College roommate", "Works as a data scientist", "Regular gaming partner", "Introduced John to his current company" ] },
+    { "id": "doctor1", "name": "Dr. Patricia Williams", "type": "Person", "val": 11, "color": "#4285F4", "observations": [ "Family physician", "Managing John's diabetes", "15 years of practice", "Focuses on preventative care" ] },
+    { "id": "doctor2", "name": "Dr. Richard Thompson", "type": "Person", "val": 10, "color": "#4285F4", "observations": [ "Endocrinologist", "Specialist for John's diabetes", "Researcher in metabolic disorders", "Associate professor at University Medical Center" ] },
+    { "id": "dentist1", "name": "Dr. Susan Miller", "type": "Person", "val": 9, "color": "#4285F4", "observations": [ "Family dentist", "Treats the whole Doe family", "Owns private practice", "20 years experience" ] },
+    { "id": "therapist1", "name": "Dr. Alan Grant", "type": "Person", "val": 8, "color": "#4285F4", "observations": [ "John's therapist", "Helps with work-related stress", "Cognitive behavioral therapy specialist", "John sees him monthly" ] },
+    { "id": "project1", "name": "Knowledge Visualizer", "type": "Tool", "val": 10, "color": "#34A853", "observations": [ "3D visualization tool for knowledge graphs", "Built with modern web technologies", "Helps visualize connections between entities", "John's signature open-source project", "5,000+ GitHub stars" ] },
+    { "id": "project2", "name": "HealthTrack", "type": "Tool", "val": 9, "color": "#34A853", "observations": [ "Personal project to track health metrics", "Helps John manage his diabetes", "Mobile app with cloud sync", "Planning commercial release" ] },
+    { "id": "project3", "name": "KidCode", "type": "Tool", "val": 7, "color": "#34A853", "observations": [ "Educational coding platform for children", "Created for his son Lucas", "Used by Lucas's school", "Being expanded with more content" ] },
+    { "id": "tech1", "name": "Artificial Intelligence", "type": "Technology", "val": 12, "color": "#00BCD4", "observations": [ "Field of computer science focused on creating systems that can perform tasks requiring human intelligence", "Includes machine learning, natural language processing, and computer vision", "John's primary professional focus" ] },
+    { "id": "tech2", "name": "Blockchain", "type": "Technology", "val": 10, "color": "#00BCD4", "observations": [ "Distributed ledger technology", "John has implemented in several projects", "Interested in smart contract applications" ] },
+    { "id": "tech3", "name": "Cloud Computing", "type": "Technology", "val": 11, "color": "#00BCD4", "observations": [ "On-demand delivery of computing resources", "John is certified in major cloud platforms", "Uses daily in work projects" ] },
+    { "id": "tool1", "name": "AI Assistant", "type": "Tool", "val": 8, "color": "#34A853", "observations": [ "AI-powered assistant for productivity", "Helps with various tasks including coding and information management", "John uses daily for work and personal projects" ] },
+    { "id": "lib1", "name": "3D Graphics Library", "type": "Technology", "val": 7, "color": "#00BCD4", "observations": [ "JavaScript library for creating 3D graphics in the browser", "Used for building interactive visualizations", "Core component of Knowledge Visualizer" ] },
+    { "id": "lib2", "name": "Data Visualization Library", "type": "Technology", "val": 6, "color": "#00BCD4", "observations": [ "JavaScript library for data visualization", "Provides tools for creating interactive data visualizations", "John contributed several features" ] },
+    { "id": "org1", "name": "TechInnovate Inc.", "type": "Organization", "val": 13, "color": "#EA4335", "observations": [ "John's current employer", "Technology company focused on AI software development", "Employs over 100 people across multiple locations", "Founded in 2010", "John works as Senior Developer" ] },
+    { "id": "org2", "name": "MarketBridge", "type": "Organization", "val": 11, "color": "#EA4335", "observations": [ "Sarah's employer", "Retail marketing firm", "Over 500 employees", "Sarah leads digital marketing team" ] },
+    { "id": "org3", "name": "Westside Elementary", "type": "Organization", "val": 9, "color": "#EA4335", "observations": [ "Emma and Lucas's school", "Public elementary school", "Strong STEM program", "John volunteers with coding club" ] },
+    { "id": "org4", "name": "Previous Employer", "type": "Organization", "val": 7, "color": "#EA4335", "observations": [ "John's previous job", "Smaller tech startup", "Worked there for 3 years", "Left for better opportunities" ] },
+    { "id": "org5", "name": "University of Technology", "type": "Organization", "val": 10, "color": "#EA4335", "observations": [ "John's alma mater", "Computer Science department", "John graduated with honors", "Maintains alumni connections" ] },
+    { "id": "org6", "name": "City Hospital", "type": "Organization", "val": 12, "color": "#EA4335", "observations": [ "Where John's doctors practice", "Major medical center", "John visits regularly for diabetes management" ] },
+    { "id": "event1", "name": "Annual Tech Conference", "type": "Event", "val": 5, "color": "#FBBC05", "observations": [ "Annual gathering of technology professionals", "Features presentations on latest industry developments", "Networking opportunity for professionals", "John speaks regularly" ] },
+    { "id": "event2", "name": "Family Vacation", "type": "Event", "val": 8, "color": "#FBBC05", "observations": [ "Annual Doe family trip", "Last year went to Yellowstone", "Planning Hawaii this year", "Two weeks every summer" ] },
+    { "id": "event3", "name": "Team Building Retreat", "type": "Event", "val": 4, "color": "#FBBC05", "observations": [ "TechInnovate quarterly event", "Company-wide activities", "Last one was mountain hiking", "John helps organize" ] },
+    { "id": "event4", "name": "School Science Fair", "type": "Event", "val": 5, "color": "#FBBC05", "observations": [ "Emma won first prize", "John mentored her project", "Focused on renewable energy", "Led to school STEM club expansion" ] },
+    { "id": "event5", "name": "Parents' Anniversary", "type": "Event", "val": 6, "color": "#FBBC05", "observations": [ "Robert and Martha's 45th anniversary", "Family celebration in Florida", "Whole family attended", "John organized surprise party" ] },
+    { "id": "loc1", "name": "Family Home", "type": "Location", "val": 14, "color": "#9C27B0", "observations": [ "Suburban 4-bedroom house", "Purchased 5 years ago", "Home office for remote work", "Garden maintained by Sarah" ] },
+    { "id": "loc2", "name": "Office Building", "type": "Location", "val": 12, "color": "#9C27B0", "observations": [ "TechInnovate headquarters", "Downtown location", "John commutes 3 days a week", "Modern facilities" ] },
+    { "id": "loc3", "name": "Gym", "type": "Location", "val": 8, "color": "#9C27B0", "observations": [ "Where John works out", "5 minutes from home", "Goes 4 times weekly", "Part of diabetes management" ] },
+    { "id": "loc4", "name": "Basketball Court", "type": "Location", "val": 7, "color": "#9C27B0", "observations": [ "Community court", "Weekend games with friends", "John plays in local league", "Family often comes to watch" ] },
+    { "id": "fin1", "name": "Mortgage", "type": "Financial", "val": 9, "color": "#FF9800", "observations": [ "Home loan", "15-year fixed rate", "Major monthly expense", "Plan to pay off early" ] },
+    { "id": "fin2", "name": "Retirement Fund", "type": "Financial", "val": 10, "color": "#FF9800", "observations": [ "401k and IRA accounts", "Monthly contributions", "Investing in index funds", "Planning for early retirement" ] },
+    { "id": "fin3", "name": "Children's College Fund", "type": "Financial", "val": 8, "color": "#FF9800", "observations": [ "529 plans for Emma and Lucas", "Started when each was born", "Regular contributions", "Priority in financial planning" ] },
+    { "id": "health1", "name": "Diabetes Management", "type": "Health", "val": 11, "color": "#F06292", "observations": [ "Daily monitoring", "Diet and exercise regimen", "Regular doctor visits", "Medication management" ] },
+    { "id": "health2", "name": "Fitness Program", "type": "Health", "val": 9, "color": "#F06292", "observations": [ "Structured exercise plan", "Weight training and cardio", "Tracked in HealthTrack app", "Coordinated with doctor" ] }
   ],
   "links": [
-    {
-      "source": "user1",
-      "target": "project1",
-      "type": "created",
-      "value": 3,
-      "description": "Created and maintains"
-    },
-    {
-      "source": "user1",
-      "target": "tech1",
-      "type": "studies",
-      "value": 2,
-      "description": "Studies and works with"
-    },
-    {
-      "source": "user1",
-      "target": "tool1",
-      "type": "uses",
-      "value": 2,
-      "description": "Uses for assistance"
-    },
-    {
-      "source": "project1",
-      "target": "lib1",
-      "type": "uses",
-      "value": 1,
-      "description": "Built with"
-    },
-    {
-      "source": "project1",
-      "target": "lib2",
-      "type": "uses",
-      "value": 1,
-      "description": "Built with"
-    },
-    {
-      "source": "tool1",
-      "target": "tech1",
-      "type": "is_a",
-      "value": 1,
-      "description": "Is an example of"
-    },
-    {
-      "source": "user1",
-      "target": "org1",
-      "type": "works_at",
-      "value": 2,
-      "description": "Is employed by"
-    },
-    {
-      "source": "user1",
-      "target": "event1",
-      "type": "attended",
-      "value": 1,
-      "description": "Participated in"
-    },
-    {
-      "source": "org1",
-      "target": "event1",
-      "type": "sponsored",
-      "value": 1,
-      "description": "Provided financial support"
-    },
-    {
-      "source": "org1",
-      "target": "tech1",
-      "type": "researches",
-      "value": 2,
-      "description": "Conducts research in"
-    }
+    { "source": "user1", "target": "project1", "type": "created", "value": 3, "description": "Created and maintains" },
+    { "source": "user1", "target": "project2", "type": "created", "value": 3, "description": "Developed for personal health tracking" },
+    { "source": "user1", "target": "project3", "type": "created", "value": 2, "description": "Built for educational purposes" },
+    { "source": "user1", "target": "tech1", "type": "studies", "value": 2, "description": "Studies and works with" },
+    { "source": "user1", "target": "tech2", "type": "studies", "value": 2, "description": "Learning and implementing" },
+    { "source": "user1", "target": "tech3", "type": "uses", "value": 3, "description": "Uses extensively for development" },
+    { "source": "user1", "target": "tool1", "type": "uses", "value": 2, "description": "Uses for assistance" },
+    { "source": "user1", "target": "spouse1", "type": "married_to", "value": 4, "description": "Married for 12 years" },
+    { "source": "user1", "target": "child1", "type": "parent_of", "value": 4, "description": "Father of Emma" },
+    { "source": "user1", "target": "child2", "type": "parent_of", "value": 4, "description": "Father of Lucas" },
+    { "source": "spouse1", "target": "child1", "type": "parent_of", "value": 4, "description": "Mother of Emma" },
+    { "source": "spouse1", "target": "child2", "type": "parent_of", "value": 4, "description": "Mother of Lucas" },
+    { "source": "user1", "target": "parent1", "type": "child_of", "value": 3, "description": "Son of Robert" },
+    { "source": "user1", "target": "parent2", "type": "child_of", "value": 3, "description": "Son of Martha" },
+    { "source": "user1", "target": "sibling1", "type": "sibling_of", "value": 2, "description": "Brother of James" },
+    { "source": "parent1", "target": "parent2", "type": "married_to", "value": 4, "description": "Married for 45 years" },
+    { "source": "parent1", "target": "sibling1", "type": "parent_of", "value": 3, "description": "Father of James" },
+    { "source": "parent2", "target": "sibling1", "type": "parent_of", "value": 3, "description": "Mother of James" },
+    { "source": "user1", "target": "friend1", "type": "friend_of", "value": 2, "description": "Close friend since college" },
+    { "source": "user1", "target": "doctor1", "type": "patient_of", "value": 2, "description": "Regular checkups and diabetes management" },
+    { "source": "user1", "target": "doctor2", "type": "patient_of", "value": 2, "description": "Specialist consultation for diabetes" },
+    { "source": "user1", "target": "dentist1", "type": "patient_of", "value": 1, "description": "Regular dental checkups" },
+    { "source": "user1", "target": "therapist1", "type": "patient_of", "value": 2, "description": "Monthly therapy sessions" },
+    { "source": "spouse1", "target": "dentist1", "type": "patient_of", "value": 1, "description": "Regular dental checkups" },
+    { "source": "child1", "target": "dentist1", "type": "patient_of", "value": 1, "description": "Regular dental checkups" },
+    { "source": "child2", "target": "dentist1", "type": "patient_of", "value": 1, "description": "Regular dental checkups" },
+    { "source": "project1", "target": "lib1", "type": "uses", "value": 1, "description": "Built with" },
+    { "source": "project1", "target": "lib2", "type": "uses", "value": 1, "description": "Built with" },
+    { "source": "project2", "target": "health1", "type": "monitors", "value": 3, "description": "Tracks and analyzes" },
+    { "source": "project2", "target": "health2", "type": "monitors", "value": 2, "description": "Records and analyzes" },
+    { "source": "project3", "target": "child2", "type": "designed_for", "value": 2, "description": "Created specifically for" },
+    { "source": "tool1", "target": "tech1", "type": "is_a", "value": 1, "description": "Is an example of" },
+    { "source": "user1", "target": "org1", "type": "works_at", "value": 3, "description": "Senior Developer" },
+    { "source": "spouse1", "target": "org2", "type": "works_at", "value": 3, "description": "Marketing Director" },
+    { "source": "user1", "target": "org3", "type": "volunteers_at", "value": 2, "description": "Coding club mentor" },
+    { "source": "child1", "target": "org3", "type": "attends", "value": 3, "description": "5th grade student" },
+    { "source": "child2", "target": "org3", "type": "attends", "value": 3, "description": "2nd grade student" },
+    { "source": "user1", "target": "org4", "type": "worked_at", "value": 2, "description": "Former employee" },
+    { "source": "user1", "target": "org5", "type": "graduated_from", "value": 2, "description": "Computer Science degree" },
+    { "source": "user1", "target": "org6", "type": "patient_at", "value": 2, "description": "Regular medical care" },
+    { "source": "doctor1", "target": "org6", "type": "works_at", "value": 3, "description": "Staff physician" },
+    { "source": "doctor2", "target": "org6", "type": "works_at", "value": 3, "description": "Department head" },
+    { "source": "user1", "target": "event1", "type": "attended", "value": 2, "description": "Regular speaker" },
+    { "source": "user1", "target": "event2", "type": "organizes", "value": 3, "description": "Plans and coordinates" },
+    { "source": "user1", "target": "event3", "type": "participates_in", "value": 2, "description": "Active team member" },
+    { "source": "user1", "target": "event4", "type": "mentored", "value": 2, "description": "Guided daughter's project" },
+    { "source": "user1", "target": "event5", "type": "organized", "value": 3, "description": "Planned celebration" },
+    { "source": "spouse1", "target": "event2", "type": "participates_in", "value": 3, "description": "Family vacation" },
+    { "source": "child1", "target": "event2", "type": "participates_in", "value": 3, "description": "Family vacation" },
+    { "source": "child2", "target": "event2", "type": "participates_in", "value": 3, "description": "Family vacation" },
+    { "source": "child1", "target": "event4", "type": "won_prize", "value": 3, "description": "First place winner" },
+    { "source": "parent1", "target": "event5", "type": "celebrated", "value": 3, "description": "Anniversary celebrant" },
+    { "source": "parent2", "target": "event5", "type": "celebrated", "value": 3, "description": "Anniversary celebrant" },
+    { "source": "org1", "target": "event1", "type": "sponsored", "value": 3, "description": "Provided financial support" },
+    { "source": "org1", "target": "event3", "type": "organized", "value": 3, "description": "Company retreat" },
+    { "source": "org1", "target": "tech1", "type": "researches", "value": 3, "description": "Conducts research in" },
+    { "source": "org3", "target": "event4", "type": "hosted", "value": 2, "description": "Venue and organization" },
+    { "source": "user1", "target": "loc1", "type": "lives_at", "value": 4, "description": "Primary residence" },
+    { "source": "spouse1", "target": "loc1", "type": "lives_at", "value": 4, "description": "Primary residence" },
+    { "source": "child1", "target": "loc1", "type": "lives_at", "value": 4, "description": "Primary residence" },
+    { "source": "child2", "target": "loc1", "type": "lives_at", "value": 4, "description": "Primary residence" },
+    { "source": "user1", "target": "loc2", "type": "works_at", "value": 3, "description": "Office location" },
+    { "source": "user1", "target": "loc3", "type": "visits", "value": 2, "description": "Regular workouts" },
+    { "source": "user1", "target": "loc4", "type": "plays_at", "value": 2, "description": "Weekend basketball games" },
+    { "source": "user1", "target": "fin1", "type": "responsible_for", "value": 3, "description": "Primary borrower" },
+    { "source": "spouse1", "target": "fin1", "type": "responsible_for", "value": 3, "description": "Co-borrower" },
+    { "source": "user1", "target": "fin2", "type": "manages", "value": 3, "description": "Retirement planning" },
+    { "source": "user1", "target": "fin3", "type": "contributes_to", "value": 3, "description": "Regular deposits" },
+    { "source": "spouse1", "target": "fin3", "type": "contributes_to", "value": 3, "description": "Regular deposits" },
+    { "source": "child1", "target": "fin3", "type": "benefits_from", "value": 3, "description": "Future college funding" },
+    { "source": "child2", "target": "fin3", "type": "benefits_from", "value": 3, "description": "Future college funding" },
+    { "source": "user1", "target": "health1", "type": "manages", "value": 4, "description": "Daily health priority" },
+    { "source": "user1", "target": "health2", "type": "follows", "value": 3, "description": "Regular fitness routine" },
+    { "source": "doctor1", "target": "health1", "type": "oversees", "value": 3, "description": "Medical supervision" },
+    { "source": "doctor2", "target": "health1", "type": "specializes_in", "value": 3, "description": "Expert consultation" },
+    { "source": "project2", "target": "tech3", "type": "uses", "value": 2, "description": "Cloud storage for data" },
+    { "source": "friend1", "target": "org1", "type": "referred_to", "value": 2, "description": "Recommended John for job" },
+    { "source": "friend1", "target": "loc4", "type": "plays_at", "value": 2, "description": "Basketball team member" }
   ]
 }

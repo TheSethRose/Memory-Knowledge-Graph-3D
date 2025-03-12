@@ -138,6 +138,15 @@ export function initGraphWithData(data) {
                 graph.refresh();
             });
 
+        // Add custom event listener for node-click events from search panel
+        document.addEventListener('node-click', (event) => {
+            const node = event.detail;
+            if (node && graph) {
+                // Simulate a click on the node
+                graph.onNodeClick(node);
+            }
+        });
+
         // Set dimensions
         graph.width(window.innerWidth).height(window.innerHeight);
 
@@ -160,7 +169,7 @@ export function initGraphWithData(data) {
             setTimeout(() => {
                 const { x, y, z } = graph.camera().position;
                 graph.cameraPosition(
-                    { x: x * 0.8, y: y * 0.8, z: z * 1.2 }, // Slightly further back
+                    { x: x * 0.8, y: y * 0.8, z: z },
                     graph.controls().target,
                     1000
                 );
