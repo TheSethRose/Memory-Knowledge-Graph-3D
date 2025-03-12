@@ -50,30 +50,28 @@ export function initGraphWithData(data) {
             .nodeAutoColorBy('type')
             .nodeVal('val')
             .nodeLabel(node => `${node.name} (${node.type})`)
+            // Always show node labels by default
+            .nodeThreeObjectExtend(true)
             .nodeThreeObject(node => {
-                // Create a sphere for each node
-                const sphere = new THREE.Mesh(
-                    new THREE.SphereGeometry(Math.max(5, node.val || 5)),
-                    new THREE.MeshLambertMaterial({
-                        color: node.color,
-                        transparent: true,
-                        opacity: 0.8
-                    })
-                );
+                // Create a text sprite for the label
+                const sprite = new SpriteText(node.name);
+                sprite.color = '#FFFFFF'; // White text for better visibility
+                sprite.textHeight = 8;
+                sprite.position.y = -12; // Position below the node to avoid overlap
+                sprite.backgroundColor = highlightNodes.has(node) ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)';
+                sprite.padding = 4;
+                sprite.borderRadius = 3;
+                sprite.fontWeight = highlightNodes.has(node) ? 'bold' : 'normal';
+                sprite.strokeWidth = highlightNodes.has(node) ? 0.5 : 0;
+                sprite.strokeColor = node.color;
 
-                // Add text label if enabled
-                if (showLabels) {
-                    const sprite = new SpriteText(node.name);
-                    sprite.color = node.color;
-                    sprite.textHeight = 8;
-                    sprite.position.y = 12;
-                    sprite.backgroundColor = 'rgba(0,0,0,0.2)';
-                    sprite.padding = 2;
-                    sprite.borderRadius = 3;
-                    sphere.add(sprite);
+                // Ensure the sprite always faces the camera and is visible
+                if (sprite.material) {
+                    sprite.material.depthTest = false; // Ensure text is always visible
+                    sprite.material.depthWrite = false; // Don't write to depth buffer
                 }
 
-                return sphere;
+                return sprite;
             })
             .linkLabel(link => link.description || link.type)
             .linkWidth(link => highlightLinks.has(link) ? 3 : 1)
@@ -110,22 +108,29 @@ export function initGraphWithData(data) {
                     }
                 });
 
-                // Center the camera on the selected node with improved positioning
-                // Calculate appropriate distance based on node size
-                const distance = Math.max(80, Math.sqrt(node.val || 10) * 15);
-                const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+                // Very minimal camera movement - just enough to center the node
+                // Get current camera position
+                const currentPos = graph.camera().position;
+
+                // Calculate a very gentle camera movement that barely changes position
+                const targetPos = {
+                    // Keep almost all of the current position (95%)
+                    x: currentPos.x * 0.95 + node.x * 0.05,
+                    y: currentPos.y * 0.95 + node.y * 0.05,
+                    z: currentPos.z // Keep the same z distance
+                };
 
                 // Set camera position with smooth transition
                 graph.cameraPosition(
-                    { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // new position
+                    targetPos, // new position
                     node, // lookAt
-                    1000  // transition duration
+                    1500  // longer transition for smoother effect
                 );
 
                 // Set the node as the rotation center for orbit controls
                 graph.controls().target.set(node.x, node.y, node.z);
 
-                // Update the graph
+                // Force a re-render to update node appearances
                 graph.refresh();
             });
 
@@ -139,15 +144,30 @@ export function initGraphWithData(data) {
         // Store the graph instance
         setGraph(graph);
 
+        // Configure enhanced controls
+        configureEnhancedControls(graph);
+
         // Zoom to fit after a short delay to allow the graph to initialize
         setTimeout(() => {
+            // First zoom out to see the whole graph
             graph.zoomToFit(1000, 50);
-            document.getElementById('progress-bar').style.width = '100%';
-            // Hide loading indicator
+
+            // Then adjust the camera to a good viewing angle
             setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('progress-bar').style.width = '0%';
-            }, 500);
+                const { x, y, z } = graph.camera().position;
+                graph.cameraPosition(
+                    { x: x * 0.8, y: y * 0.8, z: z * 1.2 }, // Slightly further back
+                    graph.controls().target,
+                    1000
+                );
+
+                document.getElementById('progress-bar').style.width = '100%';
+                // Hide loading indicator
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('progress-bar').style.width = '0%';
+                }, 500);
+            }, 1200);
         }, 1000);
 
         return graph;
@@ -213,4 +233,91 @@ function getEntityColor(entityType) {
     };
 
     return entityColors[entityType] || entityColors.Default;
+}
+
+// Function to configure enhanced controls for the graph
+function configureEnhancedControls(graph) {
+    if (!graph || !graph.controls) return;
+
+    const controls = graph.controls();
+
+    // Set better defaults for controls
+    controls.rotateSpeed = 1.0;
+    controls.zoomSpeed = 1.2;
+    controls.panSpeed = 0.8;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.screenSpacePanning = true;
+
+    // Add key modifiers for enhanced control
+    const container = graph.renderer().domElement;
+
+    // Track key states
+    const keyState = {
+        shift: false,
+        ctrl: false,
+        alt: false
+    };
+
+    // Key down handler
+    window.addEventListener('keydown', (event) => {
+        if (event.key === 'Shift') {
+            keyState.shift = true;
+            controls.panSpeed = 1.5; // Faster panning with Shift
+        }
+        if (event.key === 'Control') {
+            keyState.ctrl = true;
+            controls.rotateSpeed = 0.5; // More precise rotation with Ctrl
+        }
+        if (event.key === 'Alt') {
+            keyState.alt = true;
+            controls.zoomSpeed = 0.5; // More precise zooming with Alt
+        }
+    });
+
+    // Key up handler
+    window.addEventListener('keyup', (event) => {
+        if (event.key === 'Shift') {
+            keyState.shift = false;
+            controls.panSpeed = 0.8; // Reset to normal pan speed
+        }
+        if (event.key === 'Control') {
+            keyState.ctrl = false;
+            controls.rotateSpeed = 1.0; // Reset to normal rotate speed
+        }
+        if (event.key === 'Alt') {
+            keyState.alt = false;
+            controls.zoomSpeed = 1.2; // Reset to normal zoom speed
+        }
+    });
+
+    // Add double-click to center on point
+    container.addEventListener('dblclick', (event) => {
+        const rect = container.getBoundingClientRect();
+        const mouseX = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+        const mouseY = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+
+        // Raycasting to find intersected objects
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera({ x: mouseX, y: mouseY }, graph.camera());
+
+        const intersects = raycaster.intersectObjects(graph.scene().children, true);
+
+        if (intersects.length > 0) {
+            const point = intersects[0].point;
+
+            // Animate camera to look at this point
+            graph.cameraPosition(
+                { x: graph.camera().position.x, y: graph.camera().position.y, z: graph.camera().position.z },
+                point,
+                1000
+            );
+
+            // Set this as the new orbit controls target
+            controls.target.set(point.x, point.y, point.z);
+        }
+    });
+
+    // Update controls to apply changes
+    controls.update();
 }

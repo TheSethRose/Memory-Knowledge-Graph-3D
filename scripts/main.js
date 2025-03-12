@@ -1,10 +1,3 @@
-// Import libraries from node_modules
-import * as THREE from 'three';
-import ForceGraph3D from '3d-force-graph';
-import SpriteText from 'three-spritetext';
-import * as d3 from 'd3';
-import Stats from 'three/examples/jsm/libs/stats.module.js';
-
 // Import modules
 import { initThreeModules } from './modules/three-loader.js';
 import { initTheme } from './modules/theme.js';
@@ -127,31 +120,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Update the node objects with or without labels
         if (Graph) {
-            Graph.nodeThreeObject(node => {
-                // Create a sphere for each node
-                const sphere = new THREE.Mesh(
-                    new THREE.SphereGeometry(Math.max(5, node.val || 5)),
-                    new THREE.MeshLambertMaterial({
-                        color: node.color,
-                        transparent: true,
-                        opacity: 0.8
-                    })
-                );
+            if (showLabels) {
+                // Show labels
+                Graph.nodeThreeObjectExtend(true)
+                    .nodeThreeObject(node => {
+                        // Create a text sprite for the label
+                        const sprite = new SpriteText(node.name);
+                        sprite.color = '#FFFFFF'; // White text for better visibility
+                        sprite.textHeight = 8;
+                        sprite.position.y = -12; // Position below the node to avoid overlap
+                        sprite.backgroundColor = highlightNodes.has(node) ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)';
+                        sprite.padding = 4;
+                        sprite.borderRadius = 3;
+                        sprite.fontWeight = highlightNodes.has(node) ? 'bold' : 'normal';
+                        sprite.strokeWidth = highlightNodes.has(node) ? 0.5 : 0;
+                        sprite.strokeColor = node.color;
 
-                // Add text label if enabled
-                if (showLabels) {
-                    const sprite = new SpriteText(node.name);
-                    sprite.color = node.color;
-                    sprite.textHeight = 8;
-                    sprite.position.y = 12;
-                    sprite.backgroundColor = 'rgba(0,0,0,0.2)';
-                    sprite.padding = 2;
-                    sprite.borderRadius = 3;
-                    sphere.add(sprite);
-                }
+                        // Ensure the sprite always faces the camera and is visible
+                        if (sprite.material) {
+                            sprite.material.depthTest = false;
+                            sprite.material.depthWrite = false;
+                        }
 
-                return sphere;
-            });
+                        return sprite;
+                    });
+            } else {
+                // Hide labels
+                Graph.nodeThreeObjectExtend(false)
+                    .nodeThreeObject(null);
+            }
+
+            // Refresh the graph to apply changes
+            Graph.refresh();
         }
     });
 
@@ -193,4 +193,76 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('resize', () => {
         Graph && Graph.width(window.innerWidth).height(window.innerHeight);
     });
+
+    // Initialize panel toggle functionality
+    initPanelToggle();
+
+    // Initialize controls help functionality
+    initControlsHelp();
 });
+
+// Function to initialize panel toggle
+function initPanelToggle() {
+    const panel = document.getElementById('main-panel');
+    const panelToggle = document.getElementById('panel-toggle');
+    const panelClose = document.querySelector('.panel-close');
+
+    if (panel && panelToggle) {
+        // Toggle button click handler
+        panelToggle.addEventListener('click', () => {
+            panel.classList.toggle('collapsed');
+
+            // Update localStorage to remember user preference
+            const isCollapsed = panel.classList.contains('collapsed');
+            localStorage.setItem('panelCollapsed', isCollapsed);
+        });
+
+        // Panel close button handler
+        if (panelClose) {
+            panelClose.addEventListener('click', () => {
+                panel.classList.add('collapsed');
+                localStorage.setItem('panelCollapsed', true);
+            });
+        }
+
+        // Check if there's a saved preference
+        const savedCollapsed = localStorage.getItem('panelCollapsed');
+        if (savedCollapsed === 'true') {
+            panel.classList.add('collapsed');
+        }
+    }
+}
+
+// Function to initialize controls help
+function initControlsHelp() {
+    const controlsHelp = document.getElementById('controls-help');
+    const controlsHelpToggle = document.getElementById('controls-help-toggle');
+    const controlClose = document.querySelector('.control-close');
+
+    if (controlsHelp && controlsHelpToggle) {
+        // Handle toggle button click - show controls if hidden
+        controlsHelpToggle.addEventListener('click', () => {
+            if (controlsHelp.classList.contains('hidden')) {
+                controlsHelp.classList.remove('hidden');
+                localStorage.setItem('controlsHelpHidden', false);
+            }
+        });
+
+        // Handle close button click - only way to hide the controls
+        if (controlClose) {
+            controlClose.addEventListener('click', () => {
+                controlsHelp.classList.add('hidden');
+                localStorage.setItem('controlsHelpHidden', true);
+            });
+        }
+
+        // Check if there's a saved preference
+        const savedHidden = localStorage.getItem('controlsHelpHidden');
+        // By default, show the controls help (only hide if explicitly set to hidden)
+        if (savedHidden === 'true') {
+            controlsHelp.classList.add('hidden');
+        }
+
+        // Remove the click outside listener to prevent auto-closing
+    }
+}

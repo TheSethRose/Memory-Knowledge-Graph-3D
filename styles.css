@@ -75,10 +75,12 @@ body {
     overflow-y: auto;
     z-index: 1000;
     color: var(--text-color);
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    transform-origin: top left;
+    opacity: 1;
 }
 
 .panel::-webkit-scrollbar {
@@ -95,24 +97,76 @@ body {
     border-radius: 8px;
 }
 
-.controls {
+.panel.collapsed {
+    transform: translateX(-350px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.panel-close {
+    font-size: 22px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    color: white;
+    font-weight: bold;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
     position: absolute;
-    top: 60px;
-    right: 10px;
+    top: -4px;
+    right: -8px;
+    padding: 0;
+    line-height: 1;
+}
+
+.panel-close:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.panel-toggle {
+    position: absolute;
+    top: 10px;
+    left: 10px;
     background-color: var(--panel-bg);
-    padding: 15px;
-    border-radius: 8px;
+    color: var(--text-color);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     box-shadow: var(--panel-shadow);
-    z-index: 1000;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
+    z-index: 1001;
+    transition: transform 0.3s ease, background-color 0.3s ease, opacity 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.panel:not(.collapsed) + .panel-toggle {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.panel-toggle-icon {
+    transition: transform 0.3s ease;
+}
+
 h1 {
-    font-size: 18px;
-    margin: 0 0 10px 0;
+    font-size: 17px;
+    margin: 0;
     color: var(--text-color);
 }
 
@@ -370,21 +424,15 @@ input:checked + .slider:before {
 
 /* Theme toggle */
 .theme-toggle {
-    position: absolute;
-    top: 12px;
-    right: 10px;
-    z-index: 1001;
     display: flex;
     align-items: center;
     background-color: var(--panel-bg);
     padding: 8px 12px;
     border-radius: 20px;
-    box-shadow: var(--panel-shadow);
     cursor: pointer;
     transition: background-color 0.3s ease;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 5px;
 }
 
 .theme-toggle-icon {
@@ -404,8 +452,8 @@ input:checked + .slider:before {
 /* Stats panel for performance monitoring */
 .stats-panel {
     position: absolute;
-    bottom: 10px;
-    left: 10px;
+    bottom: 5px;
+    right: 5px;
     z-index: 1000;
     background-color: var(--panel-bg);
     padding: 8px 12px;
@@ -443,15 +491,148 @@ input:checked + .slider:before {
         max-width: calc(100% - 50px);
         max-height: 60vh;
     }
-    
-    .controls {
-        top: auto;
-        bottom: 10px;
-        right: 10px;
-    }
-    
+
     .theme-toggle {
         top: 10px;
         right: 10px;
     }
+}
+
+/* Controls help panel */
+.controls-help {
+    position: absolute;
+    bottom: 55px;
+    right: 10px;
+    background-color: var(--panel-bg);
+    padding: 12px;
+    padding-top: 30px;
+    border-radius: 8px;
+    box-shadow: var(--panel-shadow);
+    z-index: 1000;
+    color: var(--text-color);
+    font-size: 12px;
+    max-width: 250px;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.control-close {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    color: white;
+    font-weight: bold;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.control-close:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.controls-help.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
+.controls-help h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 14px;
+    position: absolute;
+    top: 7px;
+    left: 13px;
+}
+
+.controls-help-toggle {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: var(--panel-bg);
+    color: var(--text-color);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--panel-shadow);
+    z-index: 1001;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.fps-display {
+    position: absolute;
+    bottom: 10px;
+    right: 50px;
+    background-color: var(--panel-bg);
+    color: var(--text-color);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    box-shadow: var(--panel-shadow);
+    z-index: 1001;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.control-row {
+    display: flex;
+    margin-bottom: 6px;
+    align-items: center;
+}
+
+.control-key {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 8px;
+    font-family: monospace;
+    min-width: 20px;
+    text-align: center;
+}
+
+.control-description {
+    flex: 1;
+}
+
+.panel-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--divider-color);
+}
+
+.panel-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.panel-section h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.button-group button {
+    flex: 1;
 }
