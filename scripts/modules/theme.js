@@ -11,22 +11,30 @@ export const COLORS = {
 
 // Initialize theme
 export function initTheme() {
-    // Set up dark theme
-    document.body.style.backgroundColor = '#111';
-    document.body.style.color = '#fff';
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
 
-    // Apply theme to UI elements
-    const elements = document.querySelectorAll('button, select, input[type="text"]');
-    elements.forEach(el => {
-        el.style.backgroundColor = '#333';
-        el.style.color = '#fff';
-        el.style.border = '1px solid #555';
-    });
+    // Set up theme toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    }
+}
 
-    // Style the container
-    const container = document.getElementById('graph');
-    if (container) {
-        container.style.backgroundColor = '#111';
+// Set theme
+function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+
+    // Update theme toggle icon if needed
+    const themeIcon = document.querySelector('.theme-toggle-icon');
+    if (themeIcon) {
+        themeIcon.textContent = theme === 'dark' ? '🌓' : '☀️';
     }
 }
 

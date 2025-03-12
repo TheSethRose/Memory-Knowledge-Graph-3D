@@ -24,13 +24,18 @@
             <div id="loading-status">Preparing data...</div>
         </div>
 
+        <!-- Panel toggle button - moved before the panel -->
+        <div class="panel-toggle" id="panel-toggle">
+            <span class="panel-toggle-icon">☰</span>
+        </div>
+
         <div class="panel" id="main-panel">
             <div class="panel-header">
                 <h1>Memory Knowledge Graph 3D</h1>
                 <div class="panel-close">×</div>
             </div>
 
-            <div id="data-path-form">
+            <div class="data-controls-section">
                 <div class="tab-buttons">
                     <div class="tab-button active" id="file-tab">Load From File</div>
                     <div class="tab-button" id="json-tab">Paste JSON</div>
@@ -46,72 +51,43 @@
                 </div>
             </div>
 
-            <input type="text" id="search" placeholder="Search entities..." />
-
-            <select id="category-filter">
-                <option value="All">All Categories</option>
-                <!-- Categories will be populated by JavaScript -->
-            </select>
-
-            <div class="panel-section">
-                <h3>Display Options</h3>
-                <div class="toggle-button">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="node-labels" checked>
-                        <span class="slider"></span>
-                    </label>
-                    <label for="node-labels">Show Node Labels</label>
-                </div>
-
-                <div class="toggle-button">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="observations-toggle" checked>
-                        <span class="slider"></span>
-                    </label>
-                    <label for="observations-toggle">Show Observations</label>
-                </div>
-
-                <div class="toggle-button">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="enable-navigation-controls" checked>
-                        <span class="slider"></span>
-                    </label>
-                    <label for="enable-navigation-controls">Enable Navigation Controls</label>
-                </div>
-
-                <div class="toggle-button">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="show-performance-stats" checked>
-                        <span class="slider"></span>
-                    </label>
-                    <label for="show-performance-stats">Show Performance Stats</label>
-                </div>
+            <div class="search-section">
+                <input type="text" id="search" placeholder="Search entities..." />
+                <select id="category-filter">
+                    <option value="All">All Categories</option>
+                    <!-- Categories will be populated by JavaScript -->
+                </select>
             </div>
 
-            <div class="panel-section">
-                <h3>Graph Controls</h3>
-                <div class="button-group">
-                    <button id="center-graph">Center Graph</button>
-                    <button id="reset-filters">Reset Filters</button>
-                </div>
-            </div>
-
-            <div class="panel-section">
-                <h3>Appearance</h3>
-                <div class="theme-toggle" id="theme-toggle">
+            <div class="icon-button-group">
+                <button class="icon-button" id="center-graph" title="Center Graph">⌖</button>
+                <button class="icon-button" id="reset-filters" title="Reset Filters">↻</button>
+                <button class="icon-button" id="toggle-labels" title="Toggle Labels">🏷️</button>
+                <button class="icon-button" id="toggle-controls" title="Toggle Navigation Controls">🎮</button>
+                <button class="theme-toggle" id="theme-toggle" title="Toggle Theme">
                     <span class="theme-toggle-icon">🌓</span>
                     <span class="theme-toggle-text">Toggle Theme</span>
-                </div>
-            </div>
-
-            <div class="panel-section" id="selected-node-info">
-                <h2>Select a node to see details</h2>
+                </button>
             </div>
         </div>
 
-        <!-- Panel toggle button -->
-        <div class="panel-toggle" id="panel-toggle">
-            <span class="panel-toggle-icon">☰</span>
+        <!-- Observations Panel -->
+        <div class="observations-panel collapsed" id="observations-panel">
+            <div class="observations-header">
+                <h3>Node Details</h3>
+                <div class="observations-close">×</div>
+            </div>
+            <div id="selected-node-info">
+                <h2>Select a node to see details</h2>
+            </div>
+            <div class="observation-list" id="observation-list">
+                <!-- Observations will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Observations toggle button -->
+        <div class="observations-toggle" id="observations-toggle">
+            <span>👁️</span>
         </div>
 
         <!-- Controls help panel -->

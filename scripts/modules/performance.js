@@ -16,14 +16,11 @@ export function initPerformanceMonitoring() {
     // Get reference to the FPS counter element
     fpsCounter = document.getElementById('fps-counter');
 
-    // Initialize FPS display visibility based on checkbox state
-    const showStats = document.getElementById('show-performance-stats').checked;
-    document.getElementById('fps-display').style.display = showStats ? 'block' : 'none';
-
-    // Toggle stats visibility based on checkbox
-    document.getElementById('show-performance-stats').addEventListener('change', e => {
-        document.getElementById('fps-display').style.display = e.target.checked ? 'block' : 'none';
-    });
+    // Initialize FPS display visibility - default to visible
+    const fpsDisplay = document.getElementById('fps-display');
+    if (fpsDisplay) {
+        fpsDisplay.style.display = 'block';
+    }
 
     // Start animation loop
     animate();
@@ -51,4 +48,12 @@ function animate() {
 // Get stats instance
 export function getStats() {
     return stats;
+}
+
+// Toggle FPS display visibility
+export function toggleFpsDisplay(show) {
+    const fpsDisplay = document.getElementById('fps-display');
+    if (fpsDisplay) {
+        fpsDisplay.style.display = show ? 'block' : 'none';
+    }
 }

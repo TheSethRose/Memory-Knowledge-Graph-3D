@@ -1,9 +1,17 @@
-import * as THREE from 'three';
+// We're not importing Three.js directly here anymore
+// import * as THREE from 'three';
 
+// Instead, we'll use the instance that's already loaded by 3d-force-graph
 export async function initThreeModules() {
     try {
-        // Comment out or remove this line
-        // applyGeometryFixes(THREE);
+        // Get the THREE instance from the window object (set by 3d-force-graph)
+        const THREE = window.THREE;
+
+        if (!THREE) {
+            console.warn('THREE.js not found on window object. This might cause issues.');
+            return false;
+        }
+
         console.log('Three.js version:', THREE.REVISION);
         console.log('Three.js modules loaded successfully');
         return true;

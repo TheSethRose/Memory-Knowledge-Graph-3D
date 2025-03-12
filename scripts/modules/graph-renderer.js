@@ -1,4 +1,5 @@
-import * as THREE from 'three';
+// We'll use the THREE instance from the window object
+// import * as THREE from 'three';
 import ForceGraph3D from '3d-force-graph';
 import SpriteText from 'three-spritetext';
 import * as d3 from 'd3';
@@ -42,6 +43,9 @@ export function initGraphWithData(data) {
 
         // Clear the container
         container.innerHTML = '';
+
+        // Get THREE from window object
+        const THREE = window.THREE;
 
         // Create the 3D force graph directly in the container
         const graph = ForceGraph3D({ controlType: 'orbit' })
@@ -248,6 +252,17 @@ function configureEnhancedControls(graph) {
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = true;
+
+    // Add method to check if controls are enabled
+    graph.controlsEnabled = () => {
+        return controls.enabled;
+    };
+
+    // Add method to enable/disable controls
+    graph.enableNavigationControls = (enable) => {
+        controls.enabled = enable;
+        return graph;
+    };
 
     // Add key modifiers for enhanced control
     const container = graph.renderer().domElement;

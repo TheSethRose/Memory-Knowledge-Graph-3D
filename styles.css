@@ -70,7 +70,7 @@ body {
     padding: 15px;
     border-radius: 8px;
     box-shadow: var(--panel-shadow);
-    max-width: 300px;
+    max-width: 320px;
     max-height: 90vh;
     overflow-y: auto;
     z-index: 1000;
@@ -137,13 +137,13 @@ body {
 }
 
 .panel-toggle {
-    position: absolute;
+    position: fixed;
     top: 10px;
     left: 10px;
     background-color: var(--panel-bg);
     color: var(--text-color);
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -151,11 +151,15 @@ body {
     cursor: pointer;
     box-shadow: var(--panel-shadow);
     z-index: 1001;
-    transition: transform 0.3s ease, background-color 0.3s ease, opacity 0.3s ease;
+    transition: opacity 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    /* Default state is visible */
+    opacity: 1;
+    pointer-events: auto;
 }
 
-.panel:not(.collapsed) + .panel-toggle {
+/* We'll handle the visibility in JavaScript instead of using :has */
+.panel-toggle.hidden {
     opacity: 0;
     pointer-events: none;
 }
@@ -192,6 +196,7 @@ input, select, button, textarea {
     color: var(--text-color);
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
     font-family: inherit;
+    box-sizing: border-box;
 }
 
 button {
@@ -391,17 +396,20 @@ input:checked + .slider:before {
 .tab-buttons {
     display: flex;
     margin-bottom: 10px;
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 .tab-button {
     flex: 1;
     text-align: center;
-    padding: 8px;
+    padding: 10px 8px;
     background-color: var(--tab-bg);
     border: 1px solid var(--tab-border);
     cursor: pointer;
     color: var(--tab-text);
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    font-weight: 500;
 }
 
 .tab-button:first-child {
@@ -424,29 +432,29 @@ input:checked + .slider:before {
 
 /* Theme toggle */
 .theme-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
+    justify-content: center;
     background-color: var(--panel-bg);
-    padding: 8px 12px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    color: var(--text-color);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    font-size: 16px;
+    padding: 0;
+    margin: 0 5px;
 }
 
-.theme-toggle-icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 5px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+.theme-toggle:hover {
+    background-color: var(--button-hover);
+    transform: scale(1.05);
 }
 
 .theme-toggle-text {
-    font-size: 12px;
-    color: var(--text-color);
+    display: none;
 }
 
 /* Stats panel for performance monitoring */
@@ -487,14 +495,17 @@ input:checked + .slider:before {
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
-    .panel {
-        max-width: calc(100% - 50px);
-        max-height: 60vh;
+    .panel, .observations-panel {
+        max-width: calc(100% - 30px);
     }
 
-    .theme-toggle {
-        top: 10px;
-        right: 10px;
+    .icon-button-group {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .icon-button, .theme-toggle {
+        margin-bottom: 8px;
     }
 }
 
@@ -576,7 +587,7 @@ input:checked + .slider:before {
 
 .fps-display {
     position: absolute;
-    bottom: 10px;
+    bottom: 13px;
     right: 50px;
     background-color: var(--panel-bg);
     color: var(--text-color);
@@ -635,4 +646,211 @@ input:checked + .slider:before {
 
 .button-group button {
     flex: 1;
+}
+
+/* New styles for improved panel organization */
+.search-section {
+    margin-bottom: 20px;
+}
+
+.search-section input {
+    margin-bottom: 10px;
+}
+
+/* Icon buttons */
+.icon-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--panel-bg);
+    color: var(--text-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    font-size: 16px;
+    padding: 0;
+    margin: 0 5px;
+}
+
+.icon-button:hover {
+    background-color: var(--button-hover);
+    transform: scale(1.05);
+}
+
+.icon-button-group {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+/* Observations panel */
+.observations-panel {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: var(--panel-bg);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: var(--panel-shadow);
+    max-width: 450px;
+    max-height: 600px;
+    overflow-y: auto;
+    z-index: 1000;
+    color: var(--text-color);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transform-origin: bottom left;
+}
+
+.observations-panel.collapsed {
+    transform: translateY(650px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.observations-panel #selected-node-info {
+    margin-bottom: 10px;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.observations-panel #selected-node-info h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.observations-panel #selected-node-info p {
+    font-size: 14px;
+    margin: 8px 0;
+}
+
+/* Divider between node info and observations */
+.observation-list:not(:empty) {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--divider-color);
+}
+
+/* Two-column layout for relationships */
+.relationships-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.relationship-item {
+    padding: 6px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    margin-bottom: 3px;
+    font-size: 12px;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.observations-panel #selected-node-info h3 {
+    font-size: 14px;
+    margin: 12px 0 5px 0;
+}
+
+.observations-panel #selected-node-info ul {
+    margin-top: 10px;
+    padding-left: 0;
+    list-style-type: none;
+}
+
+.observations-panel #selected-node-info li {
+    margin-bottom: 8px;
+    padding: 5px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.observation-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.observation-list:empty {
+    display: none;
+}
+
+.observation-item {
+    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.observations-toggle {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--button-bg);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    box-shadow: var(--panel-shadow);
+    z-index: 1001;
+    transition: opacity 0.3s ease, transform 0.2s ease;
+    font-size: 16px;
+}
+
+.observations-toggle:hover {
+    transform: scale(1.05);
+    background-color: var(--button-hover);
+}
+
+.observations-panel:not(.collapsed) + .observations-toggle {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.observations-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--divider-color);
+    padding-bottom: 10px;
+}
+
+.observations-header h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.observations-close {
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    color: var(--text-color);
+    font-weight: bold;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.observations-close:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1);
 }

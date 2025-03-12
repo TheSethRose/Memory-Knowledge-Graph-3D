@@ -29,6 +29,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize performance monitoring
     initPerformanceMonitoring();
 
+    // Initialize UI components
+    initPanelToggle();
+    initObservationsPanel();
+    initControlsHelp();
+
+    // Set default values for display options (since we removed the toggles)
+    window.showLabels = true;
+    window.showObservations = true;
+
     // Load sample data
     try {
         const sampleData = await fetch('sample-data.json').then(res => res.json());
@@ -113,92 +122,70 @@ document.addEventListener('DOMContentLoaded', async () => {
         filterGraph(document.getElementById('search').value.toLowerCase(), category);
     });
 
-    // Toggle node labels - ensure labels are shown by default
-    document.getElementById('node-labels').checked = true;
-    document.getElementById('node-labels').addEventListener('change', e => {
-        window.showLabels = e.target.checked;
+    // Initialize observations toggle state
+    const observationsToggle = document.getElementById('observations-toggle');
+    const observationsPanel = document.getElementById('observations-panel');
 
-        // Update the node objects with or without labels
-        if (Graph) {
-            if (showLabels) {
-                // Show labels
-                Graph.nodeThreeObjectExtend(true)
-                    .nodeThreeObject(node => {
-                        // Create a text sprite for the label
-                        const sprite = new SpriteText(node.name);
-                        sprite.color = '#FFFFFF'; // White text for better visibility
-                        sprite.textHeight = 8;
-                        sprite.position.y = -12; // Position below the node to avoid overlap
-                        sprite.backgroundColor = highlightNodes.has(node) ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)';
-                        sprite.padding = 4;
-                        sprite.borderRadius = 3;
-                        sprite.fontWeight = highlightNodes.has(node) ? 'bold' : 'normal';
-                        sprite.strokeWidth = highlightNodes.has(node) ? 0.5 : 0;
-                        sprite.strokeColor = node.color;
-
-                        // Ensure the sprite always faces the camera and is visible
-                        if (sprite.material) {
-                            sprite.material.depthTest = false;
-                            sprite.material.depthWrite = false;
-                        }
-
-                        return sprite;
-                    });
-            } else {
-                // Hide labels
-                Graph.nodeThreeObjectExtend(false)
-                    .nodeThreeObject(null);
-            }
-
-            // Refresh the graph to apply changes
-            Graph.refresh();
+    if (observationsToggle && observationsPanel) {
+        // Update visibility based on state
+        if (!showObservations) {
+            observationsPanel.classList.add('collapsed');
         }
-    });
+    }
 
-    // Toggle observations - ensure observations are shown by default
-    document.getElementById('observations-toggle').checked = true;
-    document.getElementById('observations-toggle').addEventListener('change', e => {
-        window.showObservations = e.target.checked;
-        if (selectedNode) {
-            updateSelectedNodeInfo(selectedNode);
-        }
-    });
-
-    // Toggle navigation controls - ensure navigation controls are enabled by default
-    document.getElementById('enable-navigation-controls').checked = true;
-    document.getElementById('enable-navigation-controls').addEventListener('change', e => {
-        Graph && Graph.enableNavigationControls(e.target.checked);
-    });
-
-    // Toggle performance stats - ensure performance stats are shown by default
-    document.getElementById('show-performance-stats').checked = true;
-
-    // Center graph button
+    // Add event listeners for graph controls
     document.getElementById('center-graph').addEventListener('click', () => {
-        Graph && Graph.zoomToFit(1000, 50);
+        if (Graph) {
+            Graph.zoomToFit(1000, 50);
+        }
     });
 
-    // Reset filters button
     document.getElementById('reset-filters').addEventListener('click', () => {
         document.getElementById('search').value = '';
         document.getElementById('category-filter').value = 'All';
-        highlightNodes.clear();
-        highlightLinks.clear();
-        setSelectedNode(null);
-        document.getElementById('selected-node-info').innerHTML = '<h2>Select a node to see details</h2>';
-        Graph && Graph.graphData(graphData);
+        filterGraph();
+    });
+
+    // Add event listeners for the new icon buttons
+    document.getElementById('toggle-labels').addEventListener('click', () => {
+        window.showLabels = !window.showLabels;
+        if (Graph) {
+            // Visual feedback for the button
+            const button = document.getElementById('toggle-labels');
+            if (window.showLabels) {
+                button.style.backgroundColor = '';
+                button.style.color = '';
+                Graph.nodeLabel(node => node.name);
+            } else {
+                button.style.backgroundColor = '#555';
+                button.style.color = '#999';
+                Graph.nodeLabel(null);
+            }
+        }
+    });
+
+    document.getElementById('toggle-controls').addEventListener('click', () => {
+        if (Graph) {
+            // Toggle orbit controls
+            const controlsEnabled = Graph.controlsEnabled();
+            Graph.enableNavigationControls(!controlsEnabled);
+
+            // Visual feedback for the button
+            const button = document.getElementById('toggle-controls');
+            if (!controlsEnabled) {
+                button.style.backgroundColor = '';
+                button.style.color = '';
+            } else {
+                button.style.backgroundColor = '#555';
+                button.style.color = '#999';
+            }
+        }
     });
 
     // Handle window resize
     window.addEventListener('resize', () => {
         Graph && Graph.width(window.innerWidth).height(window.innerHeight);
     });
-
-    // Initialize panel toggle functionality
-    initPanelToggle();
-
-    // Initialize controls help functionality
-    initControlsHelp();
 });
 
 // Function to initialize panel toggle
@@ -208,19 +195,27 @@ function initPanelToggle() {
     const panelClose = document.querySelector('.panel-close');
 
     if (panel && panelToggle) {
+        // Function to update toggle button visibility
+        const updateToggleVisibility = () => {
+            if (panel.classList.contains('collapsed')) {
+                panelToggle.classList.remove('hidden');
+            } else {
+                panelToggle.classList.add('hidden');
+            }
+        };
+
         // Toggle button click handler
         panelToggle.addEventListener('click', () => {
-            panel.classList.toggle('collapsed');
-
-            // Update localStorage to remember user preference
-            const isCollapsed = panel.classList.contains('collapsed');
-            localStorage.setItem('panelCollapsed', isCollapsed);
+            panel.classList.remove('collapsed');
+            updateToggleVisibility();
+            localStorage.setItem('panelCollapsed', false);
         });
 
         // Panel close button handler
         if (panelClose) {
             panelClose.addEventListener('click', () => {
                 panel.classList.add('collapsed');
+                updateToggleVisibility();
                 localStorage.setItem('panelCollapsed', true);
             });
         }
@@ -230,6 +225,40 @@ function initPanelToggle() {
         if (savedCollapsed === 'true') {
             panel.classList.add('collapsed');
         }
+
+        // Initialize toggle visibility
+        updateToggleVisibility();
+    }
+}
+
+// Function to initialize observations panel
+function initObservationsPanel() {
+    const observationsPanel = document.getElementById('observations-panel');
+    const observationsToggle = document.getElementById('observations-toggle');
+    const observationsClose = document.querySelector('.observations-close');
+
+    if (observationsPanel && observationsToggle) {
+        // Toggle button click handler - toggle visibility
+        observationsToggle.addEventListener('click', () => {
+            if (observationsPanel.classList.contains('collapsed')) {
+                observationsPanel.classList.remove('collapsed');
+                localStorage.setItem('observationsPanelCollapsed', false);
+            } else {
+                observationsPanel.classList.add('collapsed');
+                localStorage.setItem('observationsPanelCollapsed', true);
+            }
+        });
+
+        // Close button handler
+        if (observationsClose) {
+            observationsClose.addEventListener('click', () => {
+                observationsPanel.classList.add('collapsed');
+                localStorage.setItem('observationsPanelCollapsed', true);
+            });
+        }
+
+        // Default to collapsed until a node is selected
+        observationsPanel.classList.add('collapsed');
     }
 }
 

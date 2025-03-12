@@ -3,8 +3,17 @@ import { getLinksForNode, getConnectedNodes } from './graph-utils.js';
 
 // Update selected node info panel
 export function updateSelectedNodeInfo(node) {
+    // Get the observations panel and toggle
+    const observationsPanel = document.getElementById('observations-panel');
+
     if (!node) {
         document.getElementById('selected-node-info').innerHTML = '<h2>Select a node to see details</h2>';
+        document.getElementById('observation-list').innerHTML = '';
+
+        // If no node is selected, collapse the panel
+        if (observationsPanel) {
+            observationsPanel.classList.add('collapsed');
+        }
         return;
     }
 
@@ -19,18 +28,11 @@ export function updateSelectedNodeInfo(node) {
         <p><strong>ID:</strong> ${node.id}</p>
     `;
 
-    // Add observations if available and enabled
-    if (node.observations && node.observations.length > 0 && showObservations) {
-        html += '<h3>Observations</h3><ul>';
-        node.observations.forEach(obs => {
-            html += `<li>${obs}</li>`;
-        });
-        html += '</ul>';
-    }
-
-    // Add relationships
+    // Add relationships in a two-column grid
     if (links.length > 0) {
-        html += '<h3>Relationships</h3><ul>';
+        html += '<h3>Relationships</h3>';
+        html += '<div class="relationships-container">';
+
         links.forEach(link => {
             const isSource = (typeof link.source === 'object' ? link.source.id : link.source) === node.id;
             const otherNodeId = isSource
@@ -39,14 +41,34 @@ export function updateSelectedNodeInfo(node) {
             const otherNode = connectedNodes.find(n => n.id === otherNodeId);
 
             if (otherNode) {
-                html += `<li>${isSource ? 'To' : 'From'} <strong>${otherNode.name}</strong>: ${link.description || link.type}</li>`;
+                // Reversed format: relationship first, then name
+                const prefix = isSource ? '→ ' : '← ';
+                const relation = link.description || link.type;
+                html += `<div class="relationship-item">${prefix}${relation}: <strong>${otherNode.name}</strong></div>`;
             }
         });
-        html += '</ul>';
+
+        html += '</div>';
     }
 
-    // Update the info panel
+    // Update the node info section
     document.getElementById('selected-node-info').innerHTML = html;
+
+    // Add observations to the separate observations list
+    if (node.observations && node.observations.length > 0) {
+        let observationsHtml = '<h3>Observations</h3>';
+        node.observations.forEach(obs => {
+            observationsHtml += `<div class="observation-item">${obs}</div>`;
+        });
+        document.getElementById('observation-list').innerHTML = observationsHtml;
+    } else {
+        document.getElementById('observation-list').innerHTML = '';
+    }
+
+    // Show the observations panel when a node is selected
+    if (observationsPanel && observationsPanel.classList.contains('collapsed')) {
+        observationsPanel.classList.remove('collapsed');
+    }
 }
 
 // Create category options for filter
