@@ -2,7 +2,7 @@
   "nodes": [
     { "id": "user1", "name": "John Doe", "type": "Person", "val": 15, "color": "#4285F4", "observations": [ "Software developer with 5 years experience", "Interested in data visualization and analytics", "Works on open-source projects in spare time", "Born June 15, 1988", "Married with two children", "Has type 2 diabetes", "Plays basketball on weekends" ] },
     { "id": "spouse1", "name": "Sarah Doe", "type": "Person", "val": 14, "color": "#4285F4", "observations": [ "Marketing director at retail company", "MBA from State University", "Amateur photographer", "Volunteers at local animal shelter", "Born March 23, 1990" ] },
-    { "id": "child1", "name": "Emma Doe", "type": "Person", "val": 8, "color": "#4285F4", "observations": [ "10 years old", "Plays violin", "Interested in science", "Member of school chess club" ] },
+    { "id": "child1", "name": "Emily Doe", "type": "Person", "val": 8, "color": "#4285F4", "observations": [ "10 years old", "Plays violin", "Interested in science", "Member of school chess club" ] },
     { "id": "child2", "name": "Lucas Doe", "type": "Person", "val": 7, "color": "#4285F4", "observations": [ "7 years old", "Plays soccer", "Loves dinosaurs", "Taking coding classes for kids" ] },
     { "id": "parent1", "name": "Robert Doe", "type": "Person", "val": 10, "color": "#4285F4", "observations": [ "John's father", "Retired engineer", "Lives in Florida", "Vietnam War veteran", "Hobby woodworker" ] },
     { "id": "parent2", "name": "Martha Doe", "type": "Person", "val": 10, "color": "#4285F4", "observations": [ "John's mother", "Retired school teacher", "Book club organizer", "Lives in Florida with Robert" ] },

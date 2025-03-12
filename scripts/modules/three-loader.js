@@ -1,22 +1,19 @@
 // We're not importing Three.js directly here anymore
 // import * as THREE from 'three';
 
-// Instead, we'll use the instance that's already loaded by 3d-force-graph
+// Instead, we'll use the instance that's already loaded by the script tag
 export async function initThreeModules() {
     try {
-        // Get the THREE instance from the window object (set by 3d-force-graph)
-        const THREE = window.THREE;
-
-        if (!THREE) {
-            console.warn('THREE.js not found on window object. This might cause issues.');
-            return false;
+        // Check if THREE is already loaded
+        if (window.THREE) {
+            console.log('THREE.js is already loaded, version:', window.THREE.REVISION);
+            return window.THREE;
         }
 
-        console.log('Three.js version:', THREE.REVISION);
-        console.log('Three.js modules loaded successfully');
-        return true;
+        console.log('THREE.js not found in window object. This is unexpected since it should be loaded via script tag.');
+        return null;
     } catch (error) {
-        console.error('Error loading Three.js modules:', error);
+        console.error('Error initializing THREE.js modules:', error);
         throw error;
     }
 }

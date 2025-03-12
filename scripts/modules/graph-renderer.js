@@ -1,18 +1,131 @@
 // We'll use the THREE instance from the window object
 // import * as THREE from 'three';
-import ForceGraph3D from '3d-force-graph';
-import SpriteText from 'three-spritetext';
-import * as d3 from 'd3';
-import { setGraph, setGraphData, setSelectedNode, highlightNodes, highlightLinks, showLabels } from './state.js';
+// import ForceGraph3D from '3d-force-graph';
+// import SpriteText from 'three-spritetext';
+// import * as d3 from 'd3';
+import { setGraph, setGraphData, setSelectedNode, highlightNodes, highlightLinks, showLabels, Graph } from './state.js';
 import { updateSelectedNodeInfo, createCategoryOptions } from './ui-utils.js';
+
+// Function to update specific nodes without resetting the graph
+export function updateGraphNodes(newData) {
+    if (!Graph || !newData || !newData.nodes) return;
+
+    const currentData = Graph.graphData();
+    const currentNodeMap = new Map(currentData.nodes.map(node => [node.id, node]));
+    const newNodeMap = new Map(newData.nodes.map(node => [node.id, node]));
+
+    // Track nodes to be updated, added, or removed
+    const nodesToUpdate = [];
+    const nodesToAdd = [];
+    const nodesToRemove = [];
+
+    // Find nodes to update or add
+    newData.nodes.forEach(newNode => {
+        const existingNode = currentNodeMap.get(newNode.id);
+        if (existingNode) {
+            // Node exists - check if it needs updating
+            if (JSON.stringify(existingNode) !== JSON.stringify(newNode)) {
+                nodesToUpdate.push({ existing: existingNode, new: newNode });
+            }
+        } else {
+            // Node doesn't exist - add it
+            nodesToAdd.push(newNode);
+        }
+    });
+
+    // Find nodes to remove
+    currentData.nodes.forEach(currentNode => {
+        if (!newNodeMap.has(currentNode.id)) {
+            nodesToRemove.push(currentNode);
+        }
+    });
+
+    // Process updates
+    nodesToUpdate.forEach(({ existing, new: newNode }) => {
+        // Preserve position and velocity
+        const x = existing.x;
+        const y = existing.y;
+        const z = existing.z;
+        const vx = existing.vx;
+        const vy = existing.vy;
+        const vz = existing.vz;
+
+        // Update node data
+        Object.assign(existing, newNode, {
+            x, y, z, vx, vy, vz // Restore position and velocity
+        });
+
+        // Update the node's label sprite
+        if (existing.__threeObj && existing.__threeObj instanceof SpriteText) {
+            existing.__threeObj.text = newNode.name;
+        }
+    });
+
+    // Process additions
+    nodesToAdd.forEach(node => {
+        currentData.nodes.push(node);
+    });
+
+    // Process removals
+    currentData.nodes = currentData.nodes.filter(node =>
+        !nodesToRemove.some(removeNode => removeNode.id === node.id)
+    );
+
+    // Update links
+    if (newData.links) {
+        // Create maps for efficient lookup
+        const currentLinkMap = new Map(
+            currentData.links.map(link => [
+                `${link.source.id || link.source}-${link.target.id || link.target}`,
+                link
+            ])
+        );
+        const newLinkMap = new Map(
+            newData.links.map(link => [
+                `${link.source}-${link.target}`,
+                link
+            ])
+        );
+
+        // Find links to add
+        const linksToAdd = newData.links.filter(newLink => {
+            const linkKey = `${newLink.source}-${newLink.target}`;
+            return !currentLinkMap.has(linkKey);
+        });
+
+        // Find links to remove
+        const linksToRemove = currentData.links.filter(currentLink => {
+            const linkKey = `${currentLink.source.id || currentLink.source}-${currentLink.target.id || currentLink.target}`;
+            return !newLinkMap.has(linkKey);
+        });
+
+        // Update links array
+        currentData.links = currentData.links.filter(link =>
+            !linksToRemove.some(removeLink =>
+                (removeLink.source.id || removeLink.source) === (link.source.id || link.source) &&
+                (removeLink.target.id || removeLink.target) === (link.target.id || link.target)
+            )
+        );
+        currentData.links.push(...linksToAdd);
+    }
+
+    // Update the graph with modified data
+    Graph.graphData(currentData);
+
+    // Force a refresh to update all visual elements
+    Graph.refresh();
+
+    // If any updated node is currently selected, update its info panel
+    const selectedNode = currentData.nodes.find(node => highlightNodes.has(node));
+    if (selectedNode) {
+        updateSelectedNodeInfo(selectedNode);
+    }
+}
 
 // Initialize graph with data
 export function initGraphWithData(data) {
     try {
-        // Show loading indicator
-        document.getElementById('loading').style.display = 'flex';
-        document.getElementById('loading-status').textContent = 'Processing data...';
-        document.getElementById('progress-bar').style.width = '10%';
+        console.log('Initializing graph with data:', data ? 'data present' : 'no data');
 
         // Process the data if needed
         if (Array.isArray(data)) {
@@ -29,39 +142,63 @@ export function initGraphWithData(data) {
 
         // Store the graph data
         setGraphData(data);
-        document.getElementById('progress-bar').style.width = '30%';
 
         // Create category options for filter
         createCategoryOptions(data);
-        document.getElementById('progress-bar').style.width = '50%';
-
-        // Update loading status
-        document.getElementById('loading-status').textContent = 'Rendering graph...';
 
         // Get the container element
         const container = document.getElementById('graph');
+        if (!container) {
+            console.error('Graph container element not found');
+            return null;
+        }
 
-        // Clear the container
-        container.innerHTML = '';
+        // Clear the container if no graph exists
+        if (!Graph) {
+            container.innerHTML = '';
+        }
+
+        // If Graph already exists, just update the data
+        if (Graph) {
+            console.log('Graph already exists, updating data');
+            Graph.graphData(data);
+            return Graph;
+        }
 
         // Get THREE from window object
         const THREE = window.THREE;
+        if (!THREE) {
+            console.error('THREE is not defined in window object');
+            return null;
+        }
 
-        // Create the 3D force graph directly in the container
-        const graph = ForceGraph3D({ controlType: 'orbit' })
+        console.log('Creating new 3D force graph');
+
+        // Check if ForceGraph3D is available globally
+        if (!window.ForceGraph3D) {
+            console.error('ForceGraph3D is not defined in window object');
+            return null;
+        }
+
+        const graph = window.ForceGraph3D({ controlType: 'orbit' })
             (container)
             .backgroundColor(getComputedStyle(document.documentElement).getPropertyValue('--bg-color').trim())
             .nodeAutoColorBy('type')
             .nodeVal('val')
             .nodeLabel(node => `${node.name} (${node.type})`)
-            // Always show node labels by default
             .nodeThreeObjectExtend(true)
             .nodeThreeObject(node => {
+                // Check if SpriteText is available globally
+                if (!window.SpriteText) {
+                    console.error('SpriteText is not defined in window object');
+                    return null;
+                }
+
                 // Create a text sprite for the label
-                const sprite = new SpriteText(node.name);
-                sprite.color = '#FFFFFF'; // White text for better visibility
+                const sprite = new window.SpriteText(node.name);
+                sprite.color = '#FFFFFF';
                 sprite.textHeight = 8;
-                sprite.position.y = -12; // Position below the node to avoid overlap
+                sprite.position.y = -12;
                 sprite.backgroundColor = highlightNodes.has(node) ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)';
                 sprite.padding = 4;
                 sprite.borderRadius = 3;
@@ -69,10 +206,9 @@ export function initGraphWithData(data) {
                 sprite.strokeWidth = highlightNodes.has(node) ? 0.5 : 0;
                 sprite.strokeColor = node.color;
 
-                // Ensure the sprite always faces the camera and is visible
                 if (sprite.material) {
-                    sprite.material.depthTest = false; // Ensure text is always visible
-                    sprite.material.depthWrite = false; // Don't write to depth buffer
+                    sprite.material.depthTest = false;
+                    sprite.material.depthWrite = false;
                 }
 
                 return sprite;
@@ -85,110 +221,97 @@ export function initGraphWithData(data) {
             .linkDirectionalArrowLength(5)
             .linkDirectionalArrowRelPos(1)
             .linkCurvature(0.25)
-            .d3Force('charge', d3.forceManyBody().strength(-180)) // Increased repulsion between nodes
-            .d3Force('link', d3.forceLink().distance(link => 120).id(d => d.id)) // Increased distance between nodes
-            .d3Force('center', d3.forceCenter().strength(0.05)) // Weaker center force to allow more spread
-            .d3Force('collision', d3.forceCollide(node => Math.sqrt(node.val || 10) * 2.5)) // Added collision force with increased radius
-            .onNodeClick(node => {
-                // Handle node click
-                setSelectedNode(node);
-                updateSelectedNodeInfo(node);
+            .d3Force('charge', window.d3.forceManyBody().strength(-180))
+            .d3Force('link', window.d3.forceLink().distance(link => 120).id(d => d.id))
+            .d3Force('center', window.d3.forceCenter().strength(0.05))
+            .d3Force('collision', window.d3.forceCollide(node => Math.sqrt(node.val || 10) * 2.5));
 
-                // Clear previous highlights
-                highlightNodes.clear();
-                highlightLinks.clear();
+        // Define the onNodeClick handler separately to ensure it's properly bound
+        const handleNodeClick = function(node) {
+            console.log('Node clicked:', node ? node.id : 'null');
 
-                // Highlight the selected node and its links
-                highlightNodes.add(node);
+            // Handle node click
+            setSelectedNode(node);
+            updateSelectedNodeInfo(node);
 
-                // Get the graph data
-                const { nodes, links } = graph.graphData();
+            // Clear previous highlights
+            highlightNodes.clear();
+            highlightLinks.clear();
 
-                // Find links connected to the selected node
-                links.forEach(link => {
-                    if (link.source.id === node.id || link.target.id === node.id) {
-                        highlightLinks.add(link);
-                        highlightNodes.add(link.source.id === node.id ? link.target : link.source);
-                    }
-                });
+            // Highlight the selected node and its links
+            highlightNodes.add(node);
 
-                // Very minimal camera movement - just enough to center the node
-                // Get current camera position
-                const currentPos = graph.camera().position;
+            // Get the graph data
+            const { nodes, links } = graph.graphData();
 
-                // Calculate a very gentle camera movement that barely changes position
-                const targetPos = {
-                    // Keep almost all of the current position (95%)
-                    x: currentPos.x * 0.95 + node.x * 0.05,
-                    y: currentPos.y * 0.95 + node.y * 0.05,
-                    z: currentPos.z // Keep the same z distance
-                };
-
-                // Set camera position with smooth transition
-                graph.cameraPosition(
-                    targetPos, // new position
-                    node, // lookAt
-                    1500  // longer transition for smoother effect
-                );
-
-                // Set the node as the rotation center for orbit controls
-                graph.controls().target.set(node.x, node.y, node.z);
-
-                // Force a re-render to update node appearances
-                graph.refresh();
+            // Find links connected to the selected node
+            links.forEach(link => {
+                if (link.source.id === node.id || link.target.id === node.id) {
+                    highlightLinks.add(link);
+                    highlightNodes.add(link.source.id === node.id ? link.target : link.source);
+                }
             });
+
+            // Very minimal camera movement
+            const currentPos = graph.camera().position;
+            const targetPos = {
+                x: currentPos.x * 0.95 + node.x * 0.05,
+                y: currentPos.y * 0.95 + node.y * 0.05,
+                z: currentPos.z
+            };
+
+            graph.cameraPosition(
+                targetPos,
+                node,
+                1500
+            );
+
+            graph.controls().target.set(node.x, node.y, node.z);
+            graph.refresh();
+        };
+
+        // Set the onNodeClick handler
+        console.log('Setting onNodeClick handler');
+        try {
+            graph.onNodeClick(handleNodeClick);
+            console.log('onNodeClick handler set successfully');
+        } catch (error) {
+            console.error('Error setting onNodeClick handler:', error);
+
+            // Try an alternative approach
+            console.log('Trying alternative approach for setting click handler');
+            graph._options = graph._options || {};
+            graph._options.onNodeClick = handleNodeClick;
+        }
 
         // Add custom event listener for node-click events from search panel
         document.addEventListener('node-click', (event) => {
+            console.log('Custom node-click event received');
             const node = event.detail;
             if (node && graph) {
-                // Simulate a click on the node
-                graph.onNodeClick(node);
+                handleNodeClick(node);
             }
         });
 
-        // Set dimensions
+        // Set dimensions and data
         graph.width(window.innerWidth).height(window.innerHeight);
-
-        // Set graph data
         graph.graphData(data);
-        document.getElementById('progress-bar').style.width = '80%';
 
         // Store the graph instance
+        console.log('Storing graph instance');
         setGraph(graph);
 
         // Configure enhanced controls
         configureEnhancedControls(graph);
 
-        // Zoom to fit after a short delay to allow the graph to initialize
+        // Initial camera positioning
         setTimeout(() => {
-            // First zoom out to see the whole graph
-            graph.zoomToFit(1000, 50);
-
-            // Then adjust the camera to a good viewing angle
-            setTimeout(() => {
-                const { x, y, z } = graph.camera().position;
-                graph.cameraPosition(
-                    { x: x * 0.8, y: y * 0.8, z: z },
-                    graph.controls().target,
-                    1000
-                );
-
-                document.getElementById('progress-bar').style.width = '100%';
-                // Hide loading indicator
-                setTimeout(() => {
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('progress-bar').style.width = '0%';
-                }, 500);
-            }, 1200);
-        }, 1000);
+            graph.zoomToFit(400);
+        }, 200);
 
         return graph;
     } catch (error) {
         console.error('Error initializing graph:', error);
-        alert('Error initializing graph: ' + error.message);
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('progress-bar').style.width = '0%';
         throw error;
     }
 }
@@ -317,6 +440,13 @@ function configureEnhancedControls(graph) {
 
     // Add double-click to center on point
     container.addEventListener('dblclick', (event) => {
+        // Ensure THREE is defined
+        const THREE = window.THREE;
+        if (!THREE) {
+            console.error('THREE is not defined in window object');
+            return;
+        }
+
         const rect = container.getBoundingClientRect();
         const mouseX = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
         const mouseY = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;

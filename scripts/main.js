@@ -2,63 +2,149 @@
 import { initThreeModules } from './modules/three-loader.js';
 import { initTheme } from './modules/theme.js';
 import { initPerformanceMonitoring } from './modules/performance.js';
-import { initGraphWithData } from './modules/graph-renderer.js';
+import { initGraphWithData, updateGraphNodes } from './modules/graph-renderer.js';
 import { processJsonlText, processMemoryJson } from './modules/data-processor.js';
 import { filterGraph } from './modules/graph-utils.js';
 import { initSearch } from './modules/search.js';
 
 // Global state
 import { showLabels, showObservations, Graph, selectedNode, highlightNodes, highlightLinks, graphData, setSelectedNode } from './modules/state.js';
-import { updateSelectedNodeInfo } from './modules/ui-utils.js';
+import { updateSelectedNodeInfo, loadRelationshipConfig } from './modules/ui-utils.js';
+
+// Constants
+const REFRESH_INTERVAL = 5; // seconds
+
+// Function to update countdown timer
+function updateCountdown(secondsLeft) {
+    const countdownElement = document.getElementById('refresh-countdown');
+    const countdownContainer = countdownElement?.parentElement;
+
+    if (countdownElement) {
+        countdownElement.textContent = secondsLeft;
+
+        // Add visual feedback when close to refresh
+        if (countdownContainer) {
+            if (secondsLeft <= 5) {
+                countdownContainer.classList.add('active');
+            } else {
+                countdownContainer.classList.remove('active');
+            }
+        }
+    }
+}
+
+// Function to refresh data in the background
+async function refreshData() {
+    try {
+        const isJsonTab = document.getElementById('json-tab')?.classList.contains('active');
+
+        if (isJsonTab) {
+            const jsonData = document.getElementById('data-input')?.value;
+            if (jsonData) {
+                try {
+                    const data = JSON.parse(jsonData);
+                    updateGraphNodes(data);
+                } catch (error) {
+                    try {
+                        const data = processJsonlText(jsonData);
+                        updateGraphNodes(data);
+                    } catch (error) {
+                        console.error("Error refreshing data:", error);
+                    }
+                }
+            }
+        } else {
+            const fileInput = document.getElementById('file-input');
+            if (fileInput?.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        updateGraphNodes(data);
+                    } catch (jsonError) {
+                        try {
+                            const data = processJsonlText(e.target.result);
+                            updateGraphNodes(data);
+                        } catch (error) {
+                            console.error("Error refreshing file data:", error);
+                        }
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+    } catch (error) {
+        console.error("Error in refreshData:", error);
+    }
+}
 
 // Initialize application
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('DOM content loaded');
 
-    // Load Three.js modules
     try {
+        // Load Three.js modules
         await initThreeModules();
+
+        // Initialize theme and components
+        initTheme();
+        initPerformanceMonitoring();
+        initPanelToggle();
+        initObservationsPanel();
+        initControlsHelp();
+        initSearch();
+
+        // Ensure relationship mappings are loaded
+        await loadRelationshipConfig();
+
+        // Set default values for display options
+        window.showLabels = true;
+        window.showObservations = true;
+
+        // Load sample data
+        try {
+            const sampleData = await fetch('sample-data.json').then(res => res.json());
+            console.log('Sample data loaded successfully');
+            await initGraphWithData(sampleData);
+
+            // Initialize countdown timer
+            let secondsLeft = REFRESH_INTERVAL;
+            updateCountdown(secondsLeft);
+
+            // Set up countdown and refresh interval
+            setInterval(() => {
+                secondsLeft -= 1;
+                if (secondsLeft <= 0) {
+                    refreshData();
+                    secondsLeft = REFRESH_INTERVAL;
+                }
+                updateCountdown(secondsLeft);
+            }, 1000);
+
+        } catch (error) {
+            console.error('Error loading sample data:', error);
+        }
+
+        // Set up event listeners
+        setupEventListeners();
     } catch (error) {
-        console.error('Failed to load Three.js modules:', error);
-        alert('Failed to load Three.js modules. Please check the console for more information.');
-        return;
+        console.error('Failed to initialize application:', error);
+        alert('Failed to initialize application. Please check the console for more information.');
     }
+});
 
-    // Initialize theme
-    initTheme();
-
-    // Initialize performance monitoring
-    initPerformanceMonitoring();
-
-    // Initialize UI components
-    initPanelToggle();
-    initObservationsPanel();
-    initControlsHelp();
-    initSearch();
-
-    // Set default values for display options (since we removed the toggles)
-    window.showLabels = true;
-    window.showObservations = true;
-
-    // Load sample data
-    try {
-        const sampleData = await fetch('sample-data.json').then(res => res.json());
-        console.log('Sample data loaded successfully');
-        await initGraphWithData(sampleData);
-    } catch (error) {
-        console.error('Error loading sample data:', error);
-        document.getElementById('loading').style.display = 'none';
-    }
-
+// Function to set up all event listeners
+function setupEventListeners() {
     // Tab switching
-    document.getElementById('file-tab').addEventListener('click', () => {
+    document.getElementById('file-tab')?.addEventListener('click', () => {
         document.getElementById('file-tab').classList.add('active');
         document.getElementById('json-tab').classList.remove('active');
         document.getElementById('file-tab-content').style.display = 'block';
         document.getElementById('json-tab-content').style.display = 'none';
     });
 
-    document.getElementById('json-tab').addEventListener('click', () => {
+    document.getElementById('json-tab')?.addEventListener('click', () => {
         document.getElementById('json-tab').classList.add('active');
         document.getElementById('file-tab').classList.remove('active');
         document.getElementById('json-tab-content').style.display = 'block';
@@ -66,26 +152,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // File input handler
-    document.getElementById('file-input').addEventListener('change', function(event) {
+    document.getElementById('file-input')?.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    // Try to parse as regular JSON first
+                    const data = JSON.parse(e.target.result);
+                    initGraphWithData(data, true);
+                } catch (jsonError) {
+                    console.log("Not standard JSON, trying JSONL format...");
                     try {
-                        const data = JSON.parse(e.target.result);
-                        initGraphWithData(data);
-                        return;
-                    } catch (jsonError) {
-                        console.log("Not standard JSON, trying JSONL format...");
-                        // If regular JSON parsing fails, try to process as JSONL
                         const data = processJsonlText(e.target.result);
-                        initGraphWithData(data);
+                        initGraphWithData(data, true);
+                    } catch (error) {
+                        console.error("Error parsing file:", error);
+                        alert("Error parsing file: " + error.message);
                     }
-                } catch (error) {
-                    console.error("Error parsing file:", error);
-                    alert("Error parsing file: " + error.message);
                 }
             };
             reader.readAsText(file);
@@ -93,66 +176,58 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // JSON input handler
-    document.getElementById('parse-json').addEventListener('click', () => {
-        const jsonData = document.getElementById('data-input').value;
-        try {
-            // Try to parse as regular JSON first
+    document.getElementById('parse-json')?.addEventListener('click', () => {
+        const jsonData = document.getElementById('data-input')?.value;
+        if (jsonData) {
             try {
                 const data = JSON.parse(jsonData);
-                initGraphWithData(data);
+                initGraphWithData(data, true);
             } catch (jsonError) {
                 console.log("Not standard JSON, trying JSONL format...");
-                // If regular JSON parsing fails, try to process as JSONL
-                const data = processJsonlText(jsonData);
-                initGraphWithData(data);
+                try {
+                    const data = processJsonlText(jsonData);
+                    initGraphWithData(data, true);
+                } catch (error) {
+                    console.error("Error parsing data:", error);
+                    alert("Error parsing data: " + error.message);
+                }
             }
-        } catch (error) {
-            console.error("Error parsing data:", error);
-            alert("Error parsing data: " + error.message);
         }
     });
 
     // Search functionality
-    document.getElementById('search').addEventListener('input', e => {
+    document.getElementById('search')?.addEventListener('input', e => {
         const searchTerm = e.target.value.toLowerCase();
         filterGraph(searchTerm, document.getElementById('category-filter').value);
     });
 
     // Category filter
-    document.getElementById('category-filter').addEventListener('change', e => {
+    document.getElementById('category-filter')?.addEventListener('change', e => {
         const category = e.target.value;
         filterGraph(document.getElementById('search').value.toLowerCase(), category);
     });
 
-    // Initialize observations toggle state
-    const observationsToggle = document.getElementById('observations-toggle');
-    const observationsPanel = document.getElementById('observations-panel');
-
-    if (observationsToggle && observationsPanel) {
-        // Update visibility based on state
-        if (!showObservations) {
-            observationsPanel.classList.add('collapsed');
-        }
-    }
-
-    // Add event listeners for graph controls
-    document.getElementById('center-graph').addEventListener('click', () => {
+    // Graph controls
+    document.getElementById('center-graph')?.addEventListener('click', () => {
         if (Graph) {
             Graph.zoomToFit(1000, 50);
         }
     });
 
-    document.getElementById('reset-filters').addEventListener('click', () => {
-        document.getElementById('search').value = '';
-        document.getElementById('category-filter').value = 'All';
+    document.getElementById('reset-filters')?.addEventListener('click', () => {
+        if (document.getElementById('search')) {
+            document.getElementById('search').value = '';
+        }
+        if (document.getElementById('category-filter')) {
+            document.getElementById('category-filter').value = 'All';
+        }
         filterGraph();
     });
 
-    // Add event listeners for the new icon buttons
-    document.getElementById('toggle-labels').addEventListener('click', () => {
+    // Labels toggle
+    document.getElementById('toggle-labels')?.addEventListener('click', () => {
         window.showLabels = !window.showLabels;
         if (Graph) {
-            // Visual feedback for the button
             const button = document.getElementById('toggle-labels');
             if (window.showLabels) {
                 button.style.backgroundColor = '';
@@ -166,59 +241,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    document.getElementById('refresh-data').addEventListener('click', async () => {
-        // Get the current active tab
-        const isJsonTab = document.getElementById('json-tab').classList.contains('active');
-
-        if (isJsonTab) {
-            // If JSON tab is active, reparse the JSON input
-            const jsonData = document.getElementById('data-input').value;
-            if (jsonData) {
-                try {
-                    const data = JSON.parse(jsonData);
-                    await initGraphWithData(data);
-                } catch (error) {
-                    console.log("Not standard JSON, trying JSONL format...");
-                    try {
-                        const data = processJsonlText(jsonData);
-                        await initGraphWithData(data);
-                    } catch (error) {
-                        console.error("Error parsing data:", error);
-                        alert("Error parsing data: " + error.message);
-                    }
-                }
-            }
-        } else {
-            // If file tab is active, trigger file input change if a file is selected
-            const fileInput = document.getElementById('file-input');
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        await initGraphWithData(data);
-                    } catch (jsonError) {
-                        console.log("Not standard JSON, trying JSONL format...");
-                        try {
-                            const data = processJsonlText(e.target.result);
-                            await initGraphWithData(data);
-                        } catch (error) {
-                            console.error("Error parsing file:", error);
-                            alert("Error parsing file: " + error.message);
-                        }
-                    }
-                };
-                reader.readAsText(file);
-            }
-        }
-    });
-
-    // Handle window resize
+    // Window resize handler
     window.addEventListener('resize', () => {
         Graph && Graph.width(window.innerWidth).height(window.innerHeight);
     });
-});
+}
 
 // Function to initialize panel toggle
 function initPanelToggle() {
@@ -269,29 +296,36 @@ function initObservationsPanel() {
     const observationsToggle = document.getElementById('observations-toggle');
     const observationsClose = document.querySelector('.observations-close');
 
-    if (observationsPanel && observationsToggle) {
-        // Toggle button click handler - toggle visibility
-        observationsToggle.addEventListener('click', () => {
-            if (observationsPanel.classList.contains('collapsed')) {
-                observationsPanel.classList.remove('collapsed');
-                localStorage.setItem('observationsPanelCollapsed', false);
-            } else {
-                observationsPanel.classList.add('collapsed');
-                localStorage.setItem('observationsPanelCollapsed', true);
-            }
-        });
-
-        // Close button handler
-        if (observationsClose) {
-            observationsClose.addEventListener('click', () => {
-                observationsPanel.classList.add('collapsed');
-                localStorage.setItem('observationsPanelCollapsed', true);
-            });
-        }
-
-        // Default to collapsed until a node is selected
-        observationsPanel.classList.add('collapsed');
+    if (!observationsPanel || !observationsToggle) {
+        console.error('Observations panel elements not found');
+        return;
     }
+
+    console.log('Initializing observations panel');
+
+    // Toggle button click handler - toggle visibility
+    observationsToggle.addEventListener('click', () => {
+        console.log('Observations toggle clicked');
+        if (observationsPanel.classList.contains('collapsed')) {
+            observationsPanel.classList.remove('collapsed');
+            localStorage.setItem('observationsPanelCollapsed', false);
+        } else {
+            observationsPanel.classList.add('collapsed');
+            localStorage.setItem('observationsPanelCollapsed', true);
+        }
+    });
+
+    // Close button handler
+    if (observationsClose) {
+        observationsClose.addEventListener('click', () => {
+            console.log('Observations close clicked');
+            observationsPanel.classList.add('collapsed');
+            localStorage.setItem('observationsPanelCollapsed', true);
+        });
+    }
+
+    // Default to collapsed until a node is selected
+    observationsPanel.classList.add('collapsed');
 }
 
 // Function to initialize controls help

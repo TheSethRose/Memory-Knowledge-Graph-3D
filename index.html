@@ -8,22 +8,25 @@
     <!-- Favicon -->
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <!-- Load Three.js first -->
+    <script src="https://unpkg.com/three@0.137.0/build/three.min.js"></script>
+
+    <!-- Load d3 -->
+    <script src="https://unpkg.com/d3@7.8.5/dist/d3.min.js"></script>
+
+    <!-- Load SpriteText -->
+    <script src="https://unpkg.com/three-spritetext@1.6.5/dist/three-spritetext.min.js"></script>
+
+    <!-- Load 3d-force-graph -->
+    <script src="https://unpkg.com/3d-force-graph@1.71.5/dist/3d-force-graph.min.js"></script>
+
+    <!-- Load our application script -->
     <script type="module" src="/scripts/main.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <!-- Progress bar for loading large datasets -->
-        <div class="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
-        </div>
-
-        <div class="loading" id="loading">
-            <div class="loading-spinner"></div>
-            <div>Loading 3D memory graph...</div>
-            <div id="loading-status">Preparing data...</div>
-        </div>
-
         <!-- Panel toggle button - moved before the panel -->
         <div class="panel-toggle" id="panel-toggle">
             <span class="panel-toggle-icon">☰</span>
@@ -63,7 +66,6 @@
                 <button class="icon-button" id="center-graph" title="Center Graph">⌖</button>
                 <button class="icon-button" id="reset-filters" title="Reset Filters">↻</button>
                 <button class="icon-button" id="toggle-labels" title="Toggle Labels">🏷️</button>
-                <button class="icon-button" id="refresh-data" title="Refresh Data">🔄</button>
                 <button class="theme-toggle" id="theme-toggle" title="Toggle Theme">
                     <span class="theme-toggle-icon">🌓</span>
                     <span class="theme-toggle-text">Toggle Theme</span>
@@ -80,15 +82,11 @@
             <div id="selected-node-info">
                 <h2>Select a node to see details</h2>
             </div>
-            <div class="observation-list" id="observation-list">
-                <!-- Observations will be populated by JavaScript -->
-            </div>
+            <div id="observation-list"></div>
         </div>
 
         <!-- Observations toggle button -->
-        <div class="observations-toggle" id="observations-toggle">
-            <span>👁️</span>
-        </div>
+        <div class="observations-toggle" id="observations-toggle">👁️</div>
 
         <!-- Search panel in top right -->
         <div id="search-panel" class="search-panel collapsed">
@@ -144,8 +142,15 @@
             <span>?</span>
         </div>
 
-        <!-- FPS display -->
-        <div class="fps-display" id="fps-display">FPS: <span id="fps-counter">0</span></div>
+        <!-- FPS and refresh countdown display -->
+        <div class="fps-display" id="fps-display">
+            <span>FPS: <span id="fps-counter">0</span></span>
+            <span class="refresh-countdown">
+                <svg class="refresh-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 2L13 3.99545L12.9408 4.05474M13 18.0001L11 19.9108L11.0297 19.9417M12.9408 4.05474L11 6M12.9408 4.05474C12.6323 4.01859 12.3183 4 12 4C7.58172 4 4 7.58172 4 12C4 14.5264 5.17107 16.7793 7 18.2454M17 5.75463C18.8289 7.22075 20 9.47362 20 12C20 16.4183 16.4183 20 12 20C11.6716 20 11.3477 19.9802 11.0297 19.9417M13 22.0001L11.0297 19.9417" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span id="refresh-countdown">30</span>s</span>
+        </div>
 
         <div id="graph"></div>
         <div id="tooltip" class="tooltip"></div>
