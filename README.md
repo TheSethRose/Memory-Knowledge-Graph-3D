@@ -2,6 +2,8 @@
 
 A 3D visualization tool for memory knowledge graphs using Force Graph 3D. This project visualizes captured memories from the [Knowledge Graph Memory Server](https://github.com/modelcontextprotocol/servers/tree/main/src/memory).
 
+**GitHub Repository**: [https://github.com/TheSethRose/Memory-Knowledge-Graph-3D](https://github.com/TheSethRose/Memory-Knowledge-Graph-3D)
+
 ## Purpose
 
 This visualization tool helps you explore and understand memory knowledge graphs by:
@@ -44,8 +46,8 @@ Observations are discrete pieces of information about an entity, stored as strin
 
 1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/memory_graph.git
-   cd memory_graph
+   git clone https://github.com/TheSethRose/Memory-Knowledge-Graph-3D.git
+   cd Memory-Knowledge-Graph-3D
    ```
 
 2. Install dependencies:
@@ -129,4 +131,4 @@ See `scripts/README.md` for more details on the module structure.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the [MIT License](LICENSE) - see the [LICENSE](LICENSE) file for details.

@@ -1,31 +1,31 @@
 {
   "nodes": [
     {
-      "id": "seth",
-      "name": "Seth Rose",
+      "id": "user1",
+      "name": "John Doe",
       "type": "Person",
       "val": 15,
       "color": "#4285F4",
       "observations": [
-        "Software developer and AI enthusiast",
-        "Interested in knowledge graphs and data visualization",
-        "Works on memory systems for better information management"
+        "Software developer with 5 years experience",
+        "Interested in data visualization and analytics",
+        "Works on open-source projects in spare time"
       ]
     },
     {
-      "id": "memory_graph",
-      "name": "Memory Graph",
+      "id": "project1",
+      "name": "Knowledge Visualizer",
       "type": "Tool",
       "val": 10,
       "color": "#34A853",
       "observations": [
         "3D visualization tool for knowledge graphs",
-        "Built with Three.js and Force Graph",
+        "Built with modern web technologies",
         "Helps visualize connections between entities"
       ]
     },
     {
-      "id": "ai",
+      "id": "tech1",
       "name": "Artificial Intelligence",
       "type": "Technology",
       "val": 12,
@@ -36,81 +36,133 @@
       ]
     },
     {
-      "id": "claude",
-      "name": "Claude",
+      "id": "tool1",
+      "name": "AI Assistant",
       "type": "Tool",
       "val": 8,
       "color": "#34A853",
       "observations": [
-        "AI assistant developed by Anthropic",
+        "AI-powered assistant for productivity",
         "Helps with various tasks including coding and information management"
       ]
     },
     {
-      "id": "threejs",
-      "name": "Three.js",
+      "id": "lib1",
+      "name": "3D Graphics Library",
       "type": "Technology",
       "val": 7,
       "color": "#00BCD4",
       "observations": [
         "JavaScript library for creating 3D graphics in the browser",
-        "Used for building the memory graph visualization"
+        "Used for building interactive visualizations"
       ]
     },
     {
-      "id": "d3",
-      "name": "D3.js",
+      "id": "lib2",
+      "name": "Data Visualization Library",
       "type": "Technology",
       "val": 6,
       "color": "#00BCD4",
       "observations": [
         "JavaScript library for data visualization",
-        "Provides the force simulation for the memory graph"
+        "Provides tools for creating interactive data visualizations"
+      ]
+    },
+    {
+      "id": "org1",
+      "name": "Tech Company",
+      "type": "Organization",
+      "val": 9,
+      "color": "#EA4335",
+      "observations": [
+        "Technology company focused on software development",
+        "Employs over 100 people across multiple locations",
+        "Founded in 2010"
+      ]
+    },
+    {
+      "id": "event1",
+      "name": "Annual Tech Conference",
+      "type": "Event",
+      "val": 5,
+      "color": "#FBBC05",
+      "observations": [
+        "Annual gathering of technology professionals",
+        "Features presentations on latest industry developments",
+        "Networking opportunity for professionals"
       ]
     }
   ],
   "links": [
     {
-      "source": "seth",
-      "target": "memory_graph",
+      "source": "user1",
+      "target": "project1",
       "type": "created",
       "value": 3,
       "description": "Created and maintains"
     },
     {
-      "source": "seth",
-      "target": "ai",
+      "source": "user1",
+      "target": "tech1",
       "type": "studies",
       "value": 2,
       "description": "Studies and works with"
     },
     {
-      "source": "seth",
-      "target": "claude",
+      "source": "user1",
+      "target": "tool1",
       "type": "uses",
       "value": 2,
       "description": "Uses for assistance"
     },
     {
-      "source": "memory_graph",
-      "target": "threejs",
+      "source": "project1",
+      "target": "lib1",
       "type": "uses",
       "value": 1,
       "description": "Built with"
     },
     {
-      "source": "memory_graph",
-      "target": "d3",
+      "source": "project1",
+      "target": "lib2",
       "type": "uses",
       "value": 1,
       "description": "Built with"
     },
     {
-      "source": "claude",
-      "target": "ai",
+      "source": "tool1",
+      "target": "tech1",
       "type": "is_a",
       "value": 1,
       "description": "Is an example of"
+    },
+    {
+      "source": "user1",
+      "target": "org1",
+      "type": "works_at",
+      "value": 2,
+      "description": "Is employed by"
+    },
+    {
+      "source": "user1",
+      "target": "event1",
+      "type": "attended",
+      "value": 1,
+      "description": "Participated in"
+    },
+    {
+      "source": "org1",
+      "target": "event1",
+      "type": "sponsored",
+      "value": 1,
+      "description": "Provided financial support"
+    },
+    {
+      "source": "org1",
+      "target": "tech1",
+      "type": "researches",
+      "value": 2,
+      "description": "Conducts research in"
     }
   ]
 }
